@@ -53,6 +53,7 @@ namespace BadListener
 		{
 			try
 			{
+				Context.Current = context;
 				ProcessRequest(context);
 			}
 			catch (Exception exception)
