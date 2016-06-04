@@ -14,7 +14,8 @@ namespace BadListener.Tests
                 return;
             }
             string prefix = arguments.First();
-            var server = new HttpServer(prefix);
+			var requestHandler = new RequestHandler();
+            var server = new HttpServer(prefix, requestHandler);
             server.Start();
         }
     }

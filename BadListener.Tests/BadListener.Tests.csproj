@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
+    <Compile Include="RequestHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BadListener\BadListener.csproj">
