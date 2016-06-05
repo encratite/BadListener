@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -67,14 +68,20 @@ namespace BadListener
 			}
 		}
 
-		private static void ProcessRequest(HttpListenerContext context)
+		private void ProcessRequest(HttpListenerContext context)
 		{
 			var request = context.Request;
-			var pattern = new Regex("^/([A-Za-z0-9]+)");
+			var pattern = new Regex("^/([A-Za-z0-9]*)");
 			var match = pattern.Match(request.RawUrl);
 			if (match == null)
+				throw new ServerError("Invalid path.");
+			string name = match.Groups[1].Value;
+			ControllerCacheEntry entry;
+			if (!_ControllerCache.TryGetValue(name, out entry))
 				throw new ServerError("No such controller.");
-			throw new NotImplementedException();
+			Type modelType;
+			var model = Invoke(entry.Method, request, out modelType);
+			entry.Attribute.Render(model, context.Response, this);
 		}
 
 		private void SetControllerCache()
@@ -90,5 +97,43 @@ namespace BadListener
 				_ControllerCache[method.Name] = entry;
 			}
 		}
-    }
+
+		private object Invoke(MethodInfo method, HttpListenerRequest request, out Type modelType)
+        {
+            var parameters = method.GetParameters();
+            var invokeParameters = new List<object>();
+            foreach (var parameter in parameters)
+				SetParameter(request, invokeParameters, parameter);
+			var output = method.Invoke(_RequestHandler, invokeParameters.ToArray());
+            modelType = method.ReturnType;
+            return output;
+        }
+
+		private void SetParameter(HttpListenerRequest request, List<object> invokeParameters, ParameterInfo parameter)
+		{
+			object convertedParameter;
+			var type = parameter.ParameterType;
+			bool isNullable = type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
+			string argument = request.QueryString[parameter.Name];
+			if (argument != null)
+			{
+				if (isNullable)
+					type = type.GenericTypeArguments.First();
+				convertedParameter = Convert.ChangeType(argument, type);
+			}
+			else
+			{
+				if (type.IsClass || isNullable)
+				{
+					convertedParameter = null;
+				}
+				else
+				{
+					string message = string.Format("Parameter \"{0}\" has not been specified.", parameter.Name);
+					throw new ServerError(message);
+				}
+			}
+			invokeParameters.Add(convertedParameter);
+		}
+	}
 }
