@@ -10,47 +10,47 @@ using BadListener.Attribute;
 namespace BadListener
 {
 	public class HttpServer : IDisposable
-    {
-        private HttpListener _Listener;
-        private List<Thread> _RequestThreads = new List<Thread>();
+	{
+		private HttpListener _Listener;
+		private List<Thread> _RequestThreads = new List<Thread>();
 
 		private object _RequestHandler;
 		private Dictionary<string, ControllerCacheEntry> _ControllerCache = new Dictionary<string, ControllerCacheEntry>();
 
-        public HttpServer(string prefix, object requestHandler)
-        {
-            _Listener = new HttpListener();
-            _Listener.Prefixes.Add(prefix);
+		public HttpServer(string prefix, object requestHandler)
+		{
+			_Listener = new HttpListener();
+			_Listener.Prefixes.Add(prefix);
 			_RequestHandler = requestHandler;
 			SetControllerCache();
-        }
+		}
 
-        void IDisposable.Dispose()
-        {
-            Stop();
-        }
+		void IDisposable.Dispose()
+		{
+			Stop();
+		}
 
-        public void Start()
-        {
-            _Listener.Start();
-            while (true)
-            {
-                var context = _Listener.GetContext();
-                var requestThread = new Thread(() => OnRequest(context));
-                requestThread.Start();
-                _RequestThreads.Add(requestThread);
-            }
-        }
+		public void Start()
+		{
+			_Listener.Start();
+			while (true)
+			{
+				var context = _Listener.GetContext();
+				var requestThread = new Thread(() => OnRequest(context));
+				requestThread.Start();
+				_RequestThreads.Add(requestThread);
+			}
+		}
 
-        public void Stop()
-        {
-            _Listener.Stop();
-            foreach (var thread in _RequestThreads)
-                thread.Abort();
-            _RequestThreads.Clear();
-        }
+		public void Stop()
+		{
+			_Listener.Stop();
+			foreach (var thread in _RequestThreads)
+				thread.Abort();
+			_RequestThreads.Clear();
+		}
 
-        private void OnRequest(HttpListenerContext context)
+		private void OnRequest(HttpListenerContext context)
 		{
 			try
 			{
@@ -99,15 +99,15 @@ namespace BadListener
 		}
 
 		private object Invoke(MethodInfo method, HttpListenerRequest request, out Type modelType)
-        {
-            var parameters = method.GetParameters();
-            var invokeParameters = new List<object>();
-            foreach (var parameter in parameters)
+		{
+			var parameters = method.GetParameters();
+			var invokeParameters = new List<object>();
+			foreach (var parameter in parameters)
 				SetParameter(request, invokeParameters, parameter);
 			var output = method.Invoke(_RequestHandler, invokeParameters.ToArray());
-            modelType = method.ReturnType;
-            return output;
-        }
+			modelType = method.ReturnType;
+			return output;
+		}
 
 		private void SetParameter(HttpListenerRequest request, List<object> invokeParameters, ParameterInfo parameter)
 		{

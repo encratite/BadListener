@@ -9,11 +9,11 @@ namespace BadListener
 		{
 			var buffer = Encoding.UTF8.GetBytes(content);
 			response.StatusCode = 200;
-            response.ContentType = contentType;
-            response.ContentLength64 = buffer.Length;
-            var output = response.OutputStream;
-            output.Write(buffer, 0, buffer.Length);
-            output.Close();
+			response.ContentType = contentType;
+			response.ContentLength64 = buffer.Length;
+			var output = response.OutputStream;
+			output.Write(buffer, 0, buffer.Length);
+			output.Close();
 		}
 	}
 }
