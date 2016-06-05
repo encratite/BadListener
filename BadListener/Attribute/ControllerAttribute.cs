@@ -1,5 +1,4 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 
 namespace BadListener.Attribute
 {
@@ -7,8 +6,6 @@ namespace BadListener.Attribute
 	{
 		public override void Render(object model, HttpListenerResponse response, HttpServer server)
 		{
-			// SetStringResponse(html, "text/html", response);
-			throw new NotImplementedException();
 		}
 	}
 }

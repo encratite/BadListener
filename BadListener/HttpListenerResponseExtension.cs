@@ -3,7 +3,7 @@ using System.Text;
 
 namespace BadListener
 {
-	static class HttpListenerResponseExtension
+	public static class HttpListenerResponseExtension
 	{
 		public static void SetStringResponse(this HttpListenerResponse response, string content, string contentType)
 		{

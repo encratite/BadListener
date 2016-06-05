@@ -76,6 +76,8 @@ namespace BadListener
 			if (match == null)
 				throw new ServerError("Invalid path.");
 			string name = match.Groups[1].Value;
+			if (name == string.Empty)
+				name = "Index";
 			ControllerCacheEntry entry;
 			if (!_ControllerCache.TryGetValue(name, out entry))
 				throw new ServerError("No such controller.");

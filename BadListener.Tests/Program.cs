@@ -14,6 +14,7 @@ namespace BadListener.Tests
 				return;
 			}
 			string prefix = arguments.First();
+			Console.WriteLine($"Running server on {prefix}");
 			var requestHandler = new RequestHandler();
 			var server = new HttpServer(prefix, requestHandler);
 			server.Start();
