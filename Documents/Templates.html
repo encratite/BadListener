@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 	<head>
-		<title>BadListener Template Language</title>
+		<title>Template Language</title>
 	</head>
 	<body>
 		<h1>Introduction</h1>
@@ -63,8 +63,7 @@ public class Drink
 	
 	// The amount consumed, in millilitres
 	public int Amount { get; set; }
-}
-		</pre>
+}</pre>
 		
 		<h2>Accessing Properties</h2>
 		<pre>
@@ -72,16 +71,43 @@ public class Drink
 &lt;ul&gt;
 &lt;li&gt;First drink: @(.name (index (.drinks model) 0))&lt;/li&gt;
 &lt;li&gt;Second drink: @(.name (index (.drinks model) 1))&lt;/li&gt;
-&lt;/ul&gt;
-		</pre>
+&lt;/ul&gt;</pre>
 		
 		<h2>Conditional Statements</h2>
 		<pre>
-@(if (&gt;= (count (.drinks model)) 5) (
+@(if (&gt;= (count (.drinks model)) 5)
+(
 	&lt;p&gt;@(.name model) is likely drunk.&lt;/p&gt;
-) (
-	&lt;p&gt;@(.name model) is fine.&lt;/p&gt;
 )
-		</pre>
+(
+	&lt;p&gt;@(.name model) is fine.&lt;/p&gt;
+))
+
+@(if (= (count (.drinks model)) 0)
+(
+	&lt;p&gt;What a pussy!&lt;/p&gt;
+))</pre>
+
+		<h2>Loops</h2>
+		<pre>
+&lt;ol&gt;
+	@(for drink (.drinks model)
+	(
+		&lt;li&gt;@(.amount drink) ml of @(.name drink)&lt;/li&gt;
+	))
+&lt;/ol&gt;
+</pre>
+
+		<h2>Macros</h2>
+		<pre>
+@(define showDrink (description i)
+(
+	&lt;li&gt;@description: @(.name (index (.drinks model) i))&lt;/li&gt;
+)
+&lt;h1&gt;@(.name model)'s Drinks&lt;/h1&gt;
+&lt;ul&gt;
+	@(showDrink "First drink" 0)
+	@(showDrink "Second drink" 1)
+&lt;/ul&gt;</pre>
 	</body>
 </html>
