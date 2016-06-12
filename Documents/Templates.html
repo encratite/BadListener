@@ -2,47 +2,82 @@
 <html>
 	<head>
 		<title>Template Language</title>
+		<style>
+			body {
+				font-family: Helvetica, sans-serif;
+				font-size: 16px;
+			}
+			
+			p, li {
+				line-height: 26px;
+			}
+			
+			a {
+			  color: #396cad;
+			  text-decoration: none;
+			  font-weight: bold;
+			}
+			
+			a:hover {
+			  text-decoration: underline;
+			}
+			
+			pre {
+				font-size: 14px;
+				font-family: Consolas, "Lucida Console", monospace;
+				background-color: rgb(245, 245, 245);
+				border: 1px solid rgb(216, 216, 216);
+				padding: 1em;
+			}
+			
+			.container {
+				max-width: 850px;
+				margin: 0 auto;
+			}
+		</style>
 	</head>
 	<body>
-		<h1>Introduction</h1>
-		<p>
-			This is some kind of design document for the HTML template language I intend to develop for my crude C# web framework <a href="https://github.com/epicvrvs/BadListener">BadListener</a>.
-			I previously used an open source implementation of Microsoft's ASP.NET Razor engine called <a href="https://github.com/Antaris/RazorEngine">RazorEngine</a>.
-			I made it part of a simple MVC-like environment that I deployed on low end Linux servers using <a href="http://www.mono-project.com/">Mono</a> and <a href="https://nginx.org/">nginx</a> (for serving static content).
-		</p>
-		<p>
-			Unfortunately, compiling the templates was enormously slow.
-			Individual .cshtml template files would often take 1500-4000 ms to process, which slowed down the startup of the server and also made testing small changes quite cumbersome.
-			The engine, much like Microsoft's, generates C# source code from your templates which is then compiled and loaded as dynamic assemblies.
-			AppDomains are used to isolate the template code, to protect the process to some extent.
-			The slow compilation and my general interest in trying out new technology are the primary reasons I started exploring alternatives such as completely writing the template engine myself.
-		</p>
-		
-		<h1>Goals</h1>
-		<ul>
-			<li>Compilation should not take more than 50 ms per template file on low end Linux boxes</li>
-			<li>Rendering overhead should be negligible (not more than 5 ms)</li>
-			<li>Low code complexity</li>
-		</ul>
-		
-		<h1>Outline</h1>
-		<ul>
-			<li>Generate bytecode using Microsoft's <a href="https://msdn.microsoft.com/en-us/library/system.linq.expressions.expression(v=vs.110).aspx">Expression API</a></li>
-			<li>Expressions operate on models (CLR objects) returned by controllers</li>
-			<li>Static typing</li>
-			<li>Lisp-like prefix notation rather than C#-like infix notation</li>
-			<li>Small number of built-in types</li>
-			<li>Small number of operators (no binary operators, no assignment operators)</li>
-			<li>Small number of other built-in functions</li>
-			<li>No support for common features of high-level languages</li>
-			<li>No proper user-defined functions with static type signatures, only primitive macros that emit blocks</li>
-		</ul>
-		
-		<h1>Examples</h1>
-		
-		<h2>Model</h2>
-		<p>These are the C# model classes used in the examples:</p>
-		<pre>
+		<div class="container">
+			<h1>Introduction</h1>
+			<p>
+				This is some kind of design document for the HTML template language I intend to develop for my crude C# web framework <a href="https://github.com/epicvrvs/BadListener">BadListener</a>.
+				I previously used an open source implementation of Microsoft's ASP.NET Razor engine called <a href="https://github.com/Antaris/RazorEngine">RazorEngine</a>.
+				I made it part of a simple MVC-like environment that I deployed on low end Linux servers using <a href="http://www.mono-project.com/">Mono</a> and <a href="https://nginx.org/">nginx</a> (for serving static content).
+			</p>
+			<p>
+				Unfortunately, compiling the templates was enormously slow.
+				Individual .cshtml template files would often take 1500-4000 ms to process, which slowed down the startup of the server and also made testing small changes quite cumbersome.
+				The engine, much like Microsoft's, generates C# source code from your templates which is then compiled and loaded as dynamic assemblies.
+				AppDomains are used to isolate the template code, to protect the process to some extent.
+				The slow compilation and my general interest in trying out new technology are the primary reasons I started exploring alternatives such as completely writing the template engine myself.
+			</p>
+			
+			<h1>Goals</h1>
+			<ul>
+				<li>Compilation should not take more than 50 ms per template file on low end Linux boxes</li>
+				<li>Rendering overhead should be negligible (not more than 5 ms)</li>
+				<li>Low code complexity</li>
+			</ul>
+			
+			<h1>Outline</h1>
+			<ul>
+				<li>Generate bytecode using Microsoft's <a href="https://msdn.microsoft.com/en-us/library/system.linq.expressions.expression(v=vs.110).aspx">Expression API</a></li>
+				<li>Expressions operate on models (CLR objects) returned by controllers</li>
+				<li>Static typing</li>
+				<li>Lisp-like prefix notation rather than C#-like infix notation</li>
+				<li>Small number of built-in types</li>
+				<li>Small number of operators (no binary operators, no assignment operators)</li>
+				<li>Small number of other built-in functions</li>
+				<li>No support for common features of high-level languages</li>
+				<li>No proper user-defined functions with static type signatures, only primitive macros that emit blocks</li>
+				<li>Model type is derived from the controller's signature, not from the template (unlike in ASP.NET MVC)</li>
+			</ul>
+			
+			<h1>Examples</h1>
+			
+			<h2>Models</h2>
+			<p>These are the C# classes of the models used in the examples:</p>
+			<pre>
 // This is the model returned by the controller
 public class Addict
 {
@@ -65,16 +100,16 @@ public class Drink
 	public int Amount { get; set; }
 }</pre>
 		
-		<h2>Accessing Properties</h2>
-		<pre>
+			<h2>Accessing Properties</h2>
+			<pre>
 &lt;h1&gt;@(.name model)'s Drinks&lt;/h1&gt;
 &lt;ul&gt;
 &lt;li&gt;First drink: @(.name (index (.drinks model) 0))&lt;/li&gt;
 &lt;li&gt;Second drink: @(.name (index (.drinks model) 1))&lt;/li&gt;
 &lt;/ul&gt;</pre>
 		
-		<h2>Conditional Statements</h2>
-		<pre>
+			<h2>Conditional Statements</h2>
+			<pre>
 @(if (&gt;= (count (.drinks model)) 5)
 (
 	&lt;p&gt;@(.name model) is likely drunk.&lt;/p&gt;
@@ -88,8 +123,8 @@ public class Drink
 	&lt;p&gt;What a pussy!&lt;/p&gt;
 ))</pre>
 
-		<h2>Loops</h2>
-		<pre>
+			<h2>Loops</h2>
+			<pre>
 &lt;ol&gt;
 	@(for drink (.drinks model)
 	(
@@ -98,8 +133,8 @@ public class Drink
 &lt;/ol&gt;
 </pre>
 
-		<h2>Macros</h2>
-		<pre>
+			<h2>Macros</h2>
+			<pre>
 @(define showDrink (description i)
 (
 	&lt;li&gt;@description: @(.name (index (.drinks model) i))&lt;/li&gt;
@@ -109,5 +144,6 @@ public class Drink
 	@(showDrink "First drink" 0)
 	@(showDrink "Second drink" 1)
 &lt;/ul&gt;</pre>
+		</div>
 	</body>
 </html>
