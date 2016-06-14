@@ -28,6 +28,7 @@
 				background-color: rgb(245, 245, 245);
 				border: 1px solid rgb(216, 216, 216);
 				padding: 1em;
+				white-space: pre-wrap;
 			}
 			
 			.container {
@@ -64,7 +65,7 @@
 				<li>Generate bytecode using Microsoft's <a href="https://msdn.microsoft.com/en-us/library/system.linq.expressions.expression(v=vs.110).aspx">Expression API</a></li>
 				<li>Expressions operate on models (CLR objects) returned by controllers</li>
 				<li>Static typing</li>
-				<li>Lisp-like prefix notation rather than C#-like infix notation</li>
+				<li>Lisp-like prefix notation rather than C#-like infix notation (easier to parse)</li>
 				<li>Small number of built-in types</li>
 				<li>Small number of operators (no binary operators, no assignment operators)</li>
 				<li>Small number of other built-in functions</li>
@@ -90,9 +91,6 @@ public class Addict
 
 public class Drink
 {
-	// The time the drink was consumed
-	public DateTimeOffset Time { get; set; }
-	
 	// The name of the drink
 	public string Name { get; set; }
 	
@@ -102,47 +100,40 @@ public class Drink
 		
 			<h2>Accessing Properties</h2>
 			<pre>
-&lt;h1&gt;@(.name model)'s Drinks&lt;/h1&gt;
+&lt;!-- Public properties of the model ("Name", "Drinks") are exposed as globals --&gt;
+&lt;h1&gt;@Name's Drinks&lt;/h1&gt;
 &lt;ul&gt;
-&lt;li&gt;First drink: @(.name (index (.drinks model) 0))&lt;/li&gt;
-&lt;li&gt;Second drink: @(.name (index (.drinks model) 1))&lt;/li&gt;
+	&lt;!-- ".Name" generates an expression that returns the "Name" property of its argument --&gt;
+	&lt;li&gt;First drink: @(.Name (index Drinks 0))&lt;/li&gt;
+	&lt;li&gt;Second drink: @(.Name (index Drinks 1))&lt;/li&gt;
 &lt;/ul&gt;</pre>
 		
 			<h2>Conditional Statements</h2>
 			<pre>
-@(if (&gt;= (count (.drinks model)) 5)
-(
-	&lt;p&gt;@(.name model) is likely drunk.&lt;/p&gt;
-)
-(
-	&lt;p&gt;@(.name model) is fine.&lt;/p&gt;
-))
+@(if (&gt;= (length Drinks) 5)
+	(&lt;p&gt;@Name is likely drunk.&lt;/p&gt;)
+	(&lt;p&gt;@Name is fine.&lt;/p&gt;))
 
-@(if (= (count (.drinks model)) 0)
-(
-	&lt;p&gt;What a pussy!&lt;/p&gt;
-))</pre>
+@(if (= (length Drinks) 0)
+	(&lt;p&gt;What a pussy!&lt;/p&gt;))</pre>
 
 			<h2>Loops</h2>
 			<pre>
 &lt;ol&gt;
-	@(for drink (.drinks model)
-	(
-		&lt;li&gt;@(.amount drink) ml of @(.name drink)&lt;/li&gt;
-	))
+	@(for drink Drinks
+		(&lt;li&gt;@(.Amount drink) ml of @(.Name drink)&lt;/li&gt;))
 &lt;/ol&gt;
 </pre>
 
 			<h2>Macros</h2>
 			<pre>
-@(define showDrink (description i)
-(
-	&lt;li&gt;@description: @(.name (index (.drinks model) i))&lt;/li&gt;
-)
-&lt;h1&gt;@(.name model)'s Drinks&lt;/h1&gt;
+@(define ShowDrink (description i)
+	(&lt;li&gt;@description: @(.Name (index Drinks i))&lt;/li&gt;)
+
+&lt;h1&gt;@Name's Drinks&lt;/h1&gt;
 &lt;ul&gt;
-	@(showDrink "First drink" 0)
-	@(showDrink "Second drink" 1)
+	@(ShowDrink "First drink" 0)
+	@(ShowDrink "Second drink" 1)
 &lt;/ul&gt;</pre>
 		</div>
 	</body>
