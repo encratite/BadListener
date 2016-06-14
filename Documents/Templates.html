@@ -24,7 +24,7 @@
 			
 			pre {
 				font-size: 14px;
-				font-family: Consolas, "Lucida Console", monospace;
+				font-family: Consolas, Courier, monospace;
 				background-color: rgb(245, 245, 245);
 				border: 1px solid rgb(216, 216, 216);
 				padding: 1em;
@@ -33,7 +33,11 @@
 			
 			.container {
 				max-width: 850px;
-				margin: 0 auto;
+				margin: 2em auto;
+			}
+			
+			.code {
+				font-weight: bold;
 			}
 		</style>
 	</head>
@@ -77,7 +81,7 @@
 			<h1>Examples</h1>
 			
 			<h2>Models</h2>
-			<p>These are the C# classes of the models used in the examples:</p>
+			<p>These are the C# classes used in the following examples.</p>
 			<pre>
 // This is the model returned by the controller
 public class Addict
@@ -99,42 +103,71 @@ public class Drink
 }</pre>
 		
 			<h2>Accessing Properties</h2>
+			<p>
+				All public properties of the model (<span class="code">Name</span> and <span class="code">Drinks</span>) are exposed as globals.
+			</p>
 			<pre>
-&lt;!-- Public properties of the model ("Name", "Drinks") are exposed as globals --&gt;
 &lt;h1&gt;@Name's Drinks&lt;/h1&gt;
 &lt;ul&gt;
-	&lt;!-- ".Name" generates an expression that returns the "Name" property of its argument --&gt;
 	&lt;li&gt;First drink: @(.Name (index Drinks 0))&lt;/li&gt;
 	&lt;li&gt;Second drink: @(.Name (index Drinks 1))&lt;/li&gt;
 &lt;/ul&gt;</pre>
+			<p>
+				<span class="code">.Name</span> generates an expression that returns the <span class="code">Name</span> property of its argument.
+			</p>
 		
 			<h2>Conditional Statements</h2>
+			<p>
+				This pattern generates an if-then-else expression or an if-then expression, depending on whether the third argument had been specified.
+			</p>
 			<pre>
-@(if (&gt;= (length Drinks) 5)
+(if (&gt;= (length Drinks) 5)
 	(&lt;p&gt;@Name is likely drunk.&lt;/p&gt;)
 	(&lt;p&gt;@Name is fine.&lt;/p&gt;))
 
-@(if (= (length Drinks) 0)
+(if (= (length Drinks) 0)
 	(&lt;p&gt;What a pussy!&lt;/p&gt;))</pre>
 
 			<h2>Loops</h2>
+			<p>
+				Most of the time, I only have use for plain foreach loops.
+				You can abuse them to imitate classical C-style for loops, too.
+				I might add some kind of while loop in future.
+			</p>
 			<pre>
 &lt;ol&gt;
-	@(for drink Drinks
+	(for drink Drinks
 		(&lt;li&gt;@(.Amount drink) ml of @(.Name drink)&lt;/li&gt;))
 &lt;/ol&gt;
 </pre>
 
 			<h2>Macros</h2>
+			<p>
+				The template language lacks proper functions but it does come with a feature that somewhat resembles C-style pre-processor macros that basically just generate code.
+			</p>
 			<pre>
-@(define ShowDrink (description i)
+(define ShowDrink (description i)
 	(&lt;li&gt;@description: @(.Name (index Drinks i))&lt;/li&gt;)
 
 &lt;h1&gt;@Name's Drinks&lt;/h1&gt;
 &lt;ul&gt;
-	@(ShowDrink "First drink" 0)
-	@(ShowDrink "Second drink" 1)
+	(ShowDrink "First drink" 0)
+	(ShowDrink "Second drink" 1)
 &lt;/ul&gt;</pre>
+			<p>
+				The <span class="code">define</span> statements are really just expanded like this:
+			</p>
+			<pre>
+&lt;h1&gt;@Name's Drinks&lt;/h1&gt;
+&lt;ul&gt;
+	(&lt;li&gt;First drink: @(.Name (index Drinks 0))&lt;/li&gt;)
+	(&lt;li&gt;Second drink: @(.Name (index Drinks 1))&lt;/li&gt;)
+&lt;/ul&gt;</pre>
+			<p>
+				This is more convenient as the language is statically typed but lacks type annotations.
+				I considered using a C++ template like approach in which one instance of the actual function code would be generated per distinct tuple of template types it was used with in the application.
+				It would increase the complexity of the code without having much of a beneficial impact on the performance, though.
+			</p>
 		</div>
 	</body>
 </html>
