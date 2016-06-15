@@ -338,12 +338,6 @@ true</pre>
 (.TheProperty object)
 (property object "TheProperty")</pre>
 			<p>
-				Emit HTML/CSS/JavaScript to the output buffer.
-				Calls CLR <span class="code">ToString()</span> to stringify the object.
-			</p>
-			<pre>
-(write value)</pre>
-			<p>
 				Define a C-style macro.
 				At compile-time, any use of the macro will be expanded to the body of the macro with the arguments substituted.
 				There are no type signatures for the arguments.
@@ -353,6 +347,17 @@ true</pre>
 			<pre>
 (define macro (argument_1 ... argument_n) body)
 </pre>
+			<p>
+				Emit HTML/CSS/JavaScript to the output buffer.
+				Calls CLR <span class="code">ToString()</span> to stringify the object.
+			</p>
+			<pre>
+(write value)</pre>
+			<p>
+				This variadic function concatenates the <span class="code">ToString()</span> representation of any number of objects passed to it.
+			</p>
+			<pre>
+(concat object_1 ... object_n)</pre>
 		</div>
 	</body>
 </html>
