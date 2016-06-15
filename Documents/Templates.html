@@ -25,10 +25,12 @@
 			pre {
 				font-size: 14px;
 				font-family: Consolas, Courier, monospace;
+				color: rgb(245, 245, 245);
 				background-color: rgb(245, 245, 245);
 				border: 1px solid rgb(216, 216, 216);
 				padding: 1em;
 				white-space: pre-wrap;
+				margin-bottom: 2em;
 			}
 			
 			.container {
@@ -40,6 +42,19 @@
 				font-weight: bold;
 			}
 		</style>
+		<script>
+			document.addEventListener("DOMContentLoaded", function(event) {
+				var elements = document.getElementsByTagName("pre");
+				for (var i = 0; i < elements.length; i++) {
+					var pre = elements[i];
+					var text = pre.innerText;
+					text = text.replace(/\[/g, "<");
+					text = text.replace(/\]/g, ">");
+					pre.innerText = text;
+					pre.style.color = "black";
+				}
+			});
+		</script>
 	</head>
 	<body>
 		<div class="container">
@@ -74,11 +89,58 @@
 				<li>Small number of operators (no binary operators, no assignment operators)</li>
 				<li>Small number of other built-in functions</li>
 				<li>No support for common features of high-level languages</li>
-				<li>No proper user-defined functions with static type signatures, only primitive macros that emit blocks</li>
+				<li>No proper user-defined functions with static type signatures, only primitive macros that generate code</li>
+				<li>No first-class functions</li>
 				<li>Model type is derived from the controller's signature, not from the template (unlike in ASP.NET MVC)</li>
 			</ul>
 			
 			<h1>Examples</h1>
+			
+			<h2>Literals and Code Blocks</h2>
+			<p>
+				Each portion of the template is either a literal that emits HMTL/CSS/JavaScript plain text or a block of code that may alter the flow of execution and is also capable of emitting text.
+			</p>
+			<p>
+				Initially, the parser processes any line in literal mode.
+				Each line of text whose first non-whitespace character is an opening bracket causes the parser to switch from literal mode to code mode.
+			</p>
+			<pre>
+[p]Here's some text (this is still a literal).[/p]
+(write "[p]This, however, was emitted by a block of code.[/p]")</pre>
+			<p>
+				<span class="code">write</span> is one of the basic built-in functions to emit text programmatically.
+				It is also possible to quickly switch to code mode and call the write function using the <span class="code">@</span> prefix.
+				I somewhat copied this feature from Microsoft's Razor engine.
+				While this special character is used in CSS and in email addresses, it is sufficiently rare and conveniently placed on most keyboards - which is likely the reason they chose to use it in their .cshtml templates.
+			</p>
+			<pre>
+[p]Hello @Name![/p]</pre>
+			<p>
+				Whereas the verbose version might look like this:
+			</p>
+			<pre>
+(write (concat "[p]Hello " Name "![/p]"))</pre>
+</pre>
+			<p>
+				<span class="code">concat</span> is a built-in variadic function that concatenates strings.
+				Using the plus operator for that purpose would certainly be more convenient and I might implement that in future.
+				However, regular Add expressions are incompatible with the C# String class as it lacks the corresponding overload at the CLR level.
+			</p>
+			<p>
+				But wait, there's more!
+				I intend to implement another questionable way of quickly switching back and forth between literal mode and code mode:
+			</p>
+			<pre>
+(if false
+	([p]Wait, what?[/p]))</pre>
+</pre>
+			<p>
+				The switch from code mode to literal mode is triggered by the sequence of the opening bracket and an opening HTML tag followed by an alphabetic character (to prevent confusion with the less-than operator), while the switch back is triggered by the sequence of a closing HTML tag followed by a closing bracket.
+				This is primarily useful for putting literals into if/else/for blocks without breaking the somewhat Lisp-like formatting by forcing users to place their opening brackets at the end of a line of code or the closing brackets on a line of its own.
+			</p>
+			<p>
+				There are more examples in the sections entitled <i>Conditional Statments</i> and <i>Loops</i>.
+			</p>
 			
 			<h2>Models</h2>
 			<p>These are the C# classes used in the following examples.</p>
@@ -90,7 +152,7 @@ public class Addict
 	public string Name { get; set; }
 	
 	// The drinks recently consumed by the user
-	public List&lt;Drink&gt; Drinks { get; set; }
+	public List[Drink] Drinks { get; set; }
 }
 
 public class Drink
@@ -107,38 +169,49 @@ public class Drink
 				All public properties of the model (<span class="code">Name</span> and <span class="code">Drinks</span>) are exposed as globals.
 			</p>
 			<pre>
-&lt;h1&gt;@Name's Drinks&lt;/h1&gt;
-&lt;ul&gt;
-	&lt;li&gt;First drink: @(.Name (index Drinks 0))&lt;/li&gt;
-	&lt;li&gt;Second drink: @(.Name (index Drinks 1))&lt;/li&gt;
-&lt;/ul&gt;</pre>
+[h1]@Name's Drinks[/h1]
+[ul]
+	[li]First drink: @(.Name (item Drinks 0))[/li]
+	[li]Second drink: @(.Name (item Drinks 1))[/li]
+[/ul]</pre>
+			<p>
+				<span class="code">item</span> is a built-in function that returns the nth item of any enumerable type.
+				Lisp nerds will hate me for not using "nth" or "elt" but, well, this is not a dialect of Lisp and it is more consistent with CLR terminology.
+			</p>
 			<p>
 				<span class="code">.Name</span> generates an expression that returns the <span class="code">Name</span> property of its argument.
+				Do not mistake it for an implicitly generated accessor - it is just type-agnostic syntactic sugar for the built-in <span class="code">property</span> function:
 			</p>
+<pre>
+[h1]@Name's Drinks[/h1]
+[ul]
+	[li]First drink: @(property (item Drinks 0) "Name")[/li]
+	[li]Second drink: @(property (item Drinks 1) "Name")[/li]
+[/ul]</pre>
 		
 			<h2>Conditional Statements</h2>
 			<p>
 				This pattern generates an if-then-else expression or an if-then expression, depending on whether the third argument had been specified.
 			</p>
 			<pre>
-(if (&gt;= (length Drinks) 5)
-	(&lt;p&gt;@Name is likely drunk.&lt;/p&gt;)
-	(&lt;p&gt;@Name is fine.&lt;/p&gt;))
+(if (]= (length Drinks) 5)
+	([p]@Name is likely drunk.[/p])
+	([p]@Name is fine.[/p]))
 
 (if (= (length Drinks) 0)
-	(&lt;p&gt;What a pussy!&lt;/p&gt;))</pre>
+	([p]What a pussy![/p]))</pre>
 
 			<h2>Loops</h2>
 			<p>
 				Most of the time, I only have use for plain foreach loops.
 				You can abuse them to imitate classical C-style for loops, too.
-				I might add some kind of while loop in future.
+				I might add some kind of while loop in future, though.
 			</p>
 			<pre>
-&lt;ol&gt;
-	(for drink Drinks
-		(&lt;li&gt;@(.Amount drink) ml of @(.Name drink)&lt;/li&gt;))
-&lt;/ol&gt;
+[ol]
+	(foreach drink Drinks
+		([li]@(.Amount drink) ml of @(.Name drink)[/li]))
+[/ol]
 </pre>
 
 			<h2>Macros</h2>
@@ -147,22 +220,22 @@ public class Drink
 			</p>
 			<pre>
 (define ShowDrink (description i)
-	(&lt;li&gt;@description: @(.Name (index Drinks i))&lt;/li&gt;)
+	([li]@description: @(.Name (item Drinks i))[/li])
 
-&lt;h1&gt;@Name's Drinks&lt;/h1&gt;
-&lt;ul&gt;
+[h1]@Name's Drinks[/h1]
+[ul]
 	(ShowDrink "First drink" 0)
 	(ShowDrink "Second drink" 1)
-&lt;/ul&gt;</pre>
+[/ul]</pre>
 			<p>
 				The <span class="code">define</span> statements are really just expanded like this:
 			</p>
 			<pre>
-&lt;h1&gt;@Name's Drinks&lt;/h1&gt;
-&lt;ul&gt;
-	(&lt;li&gt;First drink: @(.Name (index Drinks 0))&lt;/li&gt;)
-	(&lt;li&gt;Second drink: @(.Name (index Drinks 1))&lt;/li&gt;)
-&lt;/ul&gt;</pre>
+[h1]@Name's Drinks[/h1]
+[ul]
+	([li]First drink: @(.Name (item Drinks 0))[/li])
+	([li]Second drink: @(.Name (item Drinks 1))[/li])
+[/ul]</pre>
 			<p>
 				This is more convenient as the language is statically typed but lacks type annotations.
 				I considered using a C++ template like approach in which one instance of the actual function code would be generated per distinct tuple of template types it was used with in the application.
