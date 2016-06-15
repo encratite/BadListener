@@ -219,13 +219,13 @@ public class Drink
 				The template language lacks proper functions but it does come with a feature that somewhat resembles C-style pre-processor macros that basically just generate code.
 			</p>
 			<pre>
-(define ShowDrink (description i)
+(define showDrink (description i)
 	([li]@description: @(.Name (item Drinks i))[/li])
 
 [h1]@Name's Drinks[/h1]
 [ul]
-	(ShowDrink "First drink" 0)
-	(ShowDrink "Second drink" 1)
+	(showDrink "First drink" 0)
+	(showDrink "Second drink" 1)
 [/ul]</pre>
 			<p>
 				The <span class="code">define</span> statements are really just expanded like this:
@@ -241,6 +241,115 @@ public class Drink
 				I considered using a C++ template like approach in which one instance of the actual function code would be generated per distinct tuple of template types it was used with in the application.
 				It would increase the complexity of the code without having much of a beneficial impact on the performance, though.
 			</p>
+			
+			<h1>Built-In Stuff</h1>
+			
+			<h2>Types and Constants</h2>
+			<p>
+				Strings attached. Only one escape sequence is currently supported.
+			</p>
+			<pre>
+"Derp."
+"Even more \"derp\"."</pre>
+			<p>
+				Such integers. Amaze. All Int32. Sorry for that.
+			</p>
+			<pre>
+0
+-1
+234563645</pre>
+			<p>
+				Double up! No floats. No ".3" notation supported.
+			</p>
+			<pre>
+8.0
+-23.5e88</pre>
+			<p>
+				True or false? It's all the same to the uncaring universe.
+			</p>
+			<pre>
+false
+true</pre>
+
+			<h2>Operators</h2>
+			<p>
+				Logical operators:
+			</p>
+			<pre>
+(not a)
+(and a b)
+(or a b)
+</pre>
+			<p>
+				Arithmetic operators:
+			</p>
+			<pre>
+(+ a b)
+(- a b)
+(* a b)
+(/ a b)
+(% a b)
+</pre>
+			<p>
+				Comparison operators:
+			</p>
+			<pre>
+(= a b)
+(!= a b)
+([ a b)
+(] a b)
+([= a b)
+(]= a b)
+</pre>
+
+			<h2>Functions</h2>
+			<p>
+				A conditional statement with or without an else body, depending on the number of arguments.
+			</p>
+			<pre>
+(if condition then)
+(if condition then else)</pre>
+			<p>
+				Iterate over the elements of an IEnumerable, assigning the current value to the iterator.
+				Do stuff with the iterator in the body.
+			</p>
+			<pre>
+(foreach iterator enumerable body)</pre>
+			<p>
+				Returns the Length() of an IEnumerable.
+				Might also support arrays in future.
+				Don't really have any use for those right now, though.
+			</p>
+<pre>
+(length enumerable)</pre>
+			<p>
+				Retrieve the nth element of an IEnumerable.
+				Might support arrays in future, too.
+			</p>
+<pre>
+(item enumerable n)</pre>
+			<p>
+				Generate an expression that returns the property of the argument.
+				Comes in two flavours: the one with syntactic sugar and the verbose one.
+			</p>
+			<pre>
+(.TheProperty object)
+(property object "TheProperty")</pre>
+			<p>
+				Emit HTML/CSS/JavaScript to the output buffer.
+			</p>
+			<pre>
+(write text)</pre>
+			<p>
+				Define a C-style macro.
+				At compile-time, any use of the macro will be expanded to the body of the macro with the arguments substituted.
+				There are no type signatures for the arguments.
+				You may abuse a macro to pass any types you wish as long as the code compiles after expansion.
+				This language currently lacks proper functions.
+			</p>
+			<pre>
+(define macro (argument_1 ... argument_n) body)
+</pre>
 		</div>
 	</body>
 </html>
