@@ -249,21 +249,23 @@ public class Drink
 				Strings attached. Only one escape sequence is currently supported.
 			</p>
 			<pre>
-"Derp."
-"Even more \"derp\"."</pre>
+"String."
+"Even more \"string\"."</pre>
 			<p>
 				Such integers. Amaze. All Int32. Sorry for that.
 			</p>
 			<pre>
 0
 -1
-234563645</pre>
+233</pre>
 			<p>
-				Double up! No floats. No ".3" notation supported.
+				Double up! No floats.
+				No ".3" notation supported.
+				No scientific notation supported, either.
 			</p>
 			<pre>
 8.0
--23.5e88</pre>
+-23.5</pre>
 			<p>
 				True or false? It's all the same to the uncaring universe.
 			</p>
@@ -310,20 +312,20 @@ true</pre>
 (if condition then)
 (if condition then else)</pre>
 			<p>
-				Iterate over the elements of an IEnumerable, assigning the current value to the iterator.
+				Iterate over the elements of an <span class="code">IEnumerable</span>, assigning the current value to the iterator.
 				Do stuff with the iterator in the body.
 			</p>
 			<pre>
 (foreach iterator enumerable body)</pre>
 			<p>
-				Returns the Length() of an IEnumerable.
+				Returns the <span class="code">Length()</span> of an <span class="code">IEnumerable</span>.
 				Might also support arrays in future.
 				Don't really have any use for those right now, though.
 			</p>
 <pre>
 (length enumerable)</pre>
 			<p>
-				Retrieve the nth element of an IEnumerable.
+				Retrieve the nth element of an <span class="code">IEnumerable</span>.
 				Might support arrays in future, too.
 			</p>
 <pre>
@@ -337,9 +339,10 @@ true</pre>
 (property object "TheProperty")</pre>
 			<p>
 				Emit HTML/CSS/JavaScript to the output buffer.
+				Calls CLR <span class="code">ToString()</span> to stringify the object.
 			</p>
 			<pre>
-(write text)</pre>
+(write value)</pre>
 			<p>
 				Define a C-style macro.
 				At compile-time, any use of the macro will be expanded to the body of the macro with the arguments substituted.
