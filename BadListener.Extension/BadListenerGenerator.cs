@@ -78,18 +78,41 @@ namespace BadListener.Extension
 		private void GenerateRenderCode(string input, CodeBuilder builder)
 		{
 			string model = null;
-			if (model == null)
-				throw new CompilerException("No model has been set.");
-			builder.AppendLine($"public override void Render({model} Model)");
 			builder.IncreaseIndentation();
 			var lines = input.Split('\n');
 			var literals = new List<string>();
+			var modelPattern = new MatchState("^@model (.+)$");
+			var statementPattern = new MatchState(@"^@(if|for|foreach|while\s*\(.+\))$");
 			foreach (string untrimmedLine in lines)
 			{
 				string line = untrimmedLine.Trim();
-				if (line == "{" || line == "}")
+				if (line == "{")
 				{
 					MergeAndEmitLiterals(literals, builder);
+					builder.IncreaseIndentation();
+				}
+				else if (line == "}")
+				{
+					MergeAndEmitLiterals(literals, builder);
+					builder.DecreaseIndentation();
+				}
+				else if (line.Length > 0 && line[0] == '@')
+				{
+					if (modelPattern.Matches(line))
+					{
+						if (model != null)
+							throw new CompilerException("Encountered multiple model definitions.");
+						model = modelPattern.Group(1);
+					}
+					if (statementPattern.Matches(line))
+					{
+						string statement = statementPattern.Group(1);
+						builder.AppendLine(statement);
+					}
+					else
+					{
+						throw new CompilerException("Unknown statement.");
+					}
 				}
 				else
 				{
@@ -98,7 +121,9 @@ namespace BadListener.Extension
 			}
 			MergeAndEmitLiterals(literals, builder);
 			builder.DecreaseIndentation();
-			throw new NotImplementedException();
+			if (model == null)
+				throw new CompilerException("No model has been set.");
+			builder.PrependLine($"public override void Render({model} Model)");
 		}
 
 		private void MergeAndEmitLiterals(List<string> literals, CodeBuilder builder)

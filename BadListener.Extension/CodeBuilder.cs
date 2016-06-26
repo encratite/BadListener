@@ -10,8 +10,14 @@ namespace BadListener.Extension
 
 		public void AppendLine(string line = "")
 		{
-			string indentation = new string('\t', _IndentationLevel);
-			_StringBuilder.AppendLine(indentation + line);
+			string value = GetLine(line);
+			_StringBuilder.AppendLine(value);
+		}
+
+		public void PrependLine(string line)
+		{
+			string value = GetLine(line) + Environment.NewLine;
+			_StringBuilder.Insert(0, value);
 		}
 
 		public void IncreaseIndentation()
@@ -31,6 +37,12 @@ namespace BadListener.Extension
 		public override string ToString()
 		{
 			return _StringBuilder.ToString();
+		}
+
+		private string GetLine(string line)
+		{
+			string indentation = new string('\t', _IndentationLevel);
+			return indentation + line;
 		}
 	}
 }
