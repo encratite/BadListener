@@ -17,6 +17,9 @@ namespace BadListener.Extension
     [ProvideObject(typeof(BadListenerGenerator))]
     public class BadListenerGenerator : IVsSingleFileGenerator
     {
+		MatchState _ModelPattern = new MatchState("^@model (.+)$");
+		MatchState _StatementPattern = new MatchState(@"^@(if|for|foreach|while\s*\(.+\))$");
+
         #region Implementation of interface IVsSingleFileGenerator
 
         int IVsSingleFileGenerator.DefaultExtension(out string pbstrDefaultExtension)
@@ -77,53 +80,56 @@ namespace BadListener.Extension
 
 		private void GenerateRenderCode(string input, CodeBuilder builder)
 		{
-			string model = null;
 			builder.IncreaseIndentation();
 			var lines = input.Split('\n');
 			var literals = new List<string>();
-			var modelPattern = new MatchState("^@model (.+)$");
-			var statementPattern = new MatchState(@"^@(if|for|foreach|while\s*\(.+\))$");
+			string model = null;
 			foreach (string untrimmedLine in lines)
 			{
 				string line = untrimmedLine.Trim();
-				if (line == "{")
-				{
-					MergeAndEmitLiterals(literals, builder);
-					builder.IncreaseIndentation();
-				}
-				else if (line == "}")
-				{
-					MergeAndEmitLiterals(literals, builder);
-					builder.DecreaseIndentation();
-				}
-				else if (line.Length > 0 && line[0] == '@')
-				{
-					if (modelPattern.Matches(line))
-					{
-						if (model != null)
-							throw new CompilerException("Encountered multiple model definitions.");
-						model = modelPattern.Group(1);
-					}
-					if (statementPattern.Matches(line))
-					{
-						string statement = statementPattern.Group(1);
-						builder.AppendLine(statement);
-					}
-					else
-					{
-						throw new CompilerException("Unknown statement.");
-					}
-				}
-				else
-				{
-					literals.Add(line);
-				}
+				ProcessLine(line, builder, literals, ref model);
 			}
 			MergeAndEmitLiterals(literals, builder);
 			builder.DecreaseIndentation();
 			if (model == null)
 				throw new CompilerException("No model has been set.");
 			builder.PrependLine($"public override void Render({model} Model)");
+		}
+
+		private void ProcessLine(string line, CodeBuilder builder, List<string> literals, ref string model)
+		{
+			if (line == "{")
+			{
+				MergeAndEmitLiterals(literals, builder);
+				builder.IncreaseIndentation();
+			}
+			else if (line == "}")
+			{
+				MergeAndEmitLiterals(literals, builder);
+				builder.DecreaseIndentation();
+			}
+			else if (line.Length > 0 && line[0] == '@')
+			{
+				if (_ModelPattern.Matches(line))
+				{
+					if (model != null)
+						throw new CompilerException("Encountered multiple model definitions.");
+					model = _ModelPattern.Group(1);
+				}
+				if (_StatementPattern.Matches(line))
+				{
+					string statement = _StatementPattern.Group(1);
+					builder.AppendLine(statement);
+				}
+				else
+				{
+					throw new CompilerException("Unknown statement.");
+				}
+			}
+			else
+			{
+				literals.Add(line);
+			}
 		}
 
 		private void MergeAndEmitLiterals(List<string> literals, CodeBuilder builder)
