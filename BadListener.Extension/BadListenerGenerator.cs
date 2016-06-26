@@ -11,38 +11,38 @@ using System.Linq;
 
 namespace BadListener.Extension
 {
-    [ComVisible(true)]
-    [Guid("717DB774-0CCA-42F2-885F-E211849C4FFD")]
-    [CodeGeneratorRegistration(typeof(BadListenerGenerator), "BadListenerGenerator", vsContextGuids.vsContextGuidVCSProject, GeneratesDesignTimeSource = true)]
-    [ProvideObject(typeof(BadListenerGenerator))]
-    public class BadListenerGenerator : IVsSingleFileGenerator
-    {
-        #region Implementation of interface IVsSingleFileGenerator
+	[ComVisible(true)]
+	[Guid("717DB774-0CCA-42F2-885F-E211849C4FFD")]
+	[CodeGeneratorRegistration(typeof(BadListenerGenerator), "BadListenerGenerator", vsContextGuids.vsContextGuidVCSProject, GeneratesDesignTimeSource = true)]
+	[ProvideObject(typeof(BadListenerGenerator))]
+	public class BadListenerGenerator : IVsSingleFileGenerator
+	{
+		#region Implementation of interface IVsSingleFileGenerator
 
-        int IVsSingleFileGenerator.DefaultExtension(out string pbstrDefaultExtension)
-        {
-            pbstrDefaultExtension = ".cs";
-            return VSConstants.S_OK;
-        }
+		int IVsSingleFileGenerator.DefaultExtension(out string pbstrDefaultExtension)
+		{
+			pbstrDefaultExtension = ".cs";
+			return VSConstants.S_OK;
+		}
 
-        int IVsSingleFileGenerator.Generate(string wszInputFilePath, string bstrInputFileContents, string wszDefaultNamespace, IntPtr[] rgbOutputFileContents, out uint pcbOutput, IVsGeneratorProgress pGenerateProgress)
-        {
-            try
-            {
+		int IVsSingleFileGenerator.Generate(string wszInputFilePath, string bstrInputFileContents, string wszDefaultNamespace, IntPtr[] rgbOutputFileContents, out uint pcbOutput, IVsGeneratorProgress pGenerateProgress)
+		{
+			try
+			{
 				string viewName = Path.GetFileNameWithoutExtension(wszInputFilePath);
 				var generator = new CodeGenerator();
-                string code = generator.GenerateCode(viewName, bstrInputFileContents, wszDefaultNamespace);
-                var bytes = Encoding.UTF8.GetBytes(code);
-                int outputLength = bytes.Length;
-                rgbOutputFileContents[0] = Marshal.AllocCoTaskMem(outputLength);
-                Marshal.Copy(bytes, 0, rgbOutputFileContents[0], outputLength);
-                pcbOutput = (uint)outputLength;
-                return VSConstants.S_OK;
-            }
-            catch (Exception exception)
-            {
-                rgbOutputFileContents = null;
-                pcbOutput = 0;
+				string code = generator.GenerateCode(viewName, bstrInputFileContents, wszDefaultNamespace);
+				var bytes = Encoding.UTF8.GetBytes(code);
+				int outputLength = bytes.Length;
+				rgbOutputFileContents[0] = Marshal.AllocCoTaskMem(outputLength);
+				Marshal.Copy(bytes, 0, rgbOutputFileContents[0], outputLength);
+				pcbOutput = (uint)outputLength;
+				return VSConstants.S_OK;
+			}
+			catch (Exception exception)
+			{
+				rgbOutputFileContents = null;
+				pcbOutput = 0;
 				if (pGenerateProgress != null)
 				{
 					string message = $"{exception.GetType()}: {exception.Message}";
@@ -53,12 +53,12 @@ namespace BadListener.Extension
 						line = (uint)compilerException.Line.Value;
 					pGenerateProgress.GeneratorError(0, 0, exception.Message, line, notSpecified);
 				}
-                return VSConstants.E_FAIL;
-            }
-        }
+				return VSConstants.E_FAIL;
+			}
+		}
 
-        #endregion
+		#endregion
 
-        
-    }
+
+	}
 }
