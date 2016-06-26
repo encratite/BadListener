@@ -4,9 +4,12 @@ namespace BadListener.Extension
 {
 	class CompilerException : Exception
 	{
-		public CompilerException(string message)
+		public int? Line { get; private set; }
+
+		public CompilerException(string message, int? line = null)
 			: base(message)
 		{
+			Line = line;
 		}
 	}
 }

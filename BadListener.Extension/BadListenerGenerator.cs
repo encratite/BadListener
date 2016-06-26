@@ -49,7 +49,11 @@ namespace BadListener.Extension
 				{
 					string message = $"{exception.GetType()}: {exception.Message}";
 					const uint notSpecified = unchecked((uint)-1);
-					pGenerateProgress.GeneratorError(0, 0, exception.Message, notSpecified, notSpecified);
+					uint line = notSpecified;
+					var compilerException = exception as CompilerException;
+					if (compilerException != null && compilerException.Line.HasValue)
+						line = (uint)compilerException.Line.Value;
+					pGenerateProgress.GeneratorError(0, 0, exception.Message, line, notSpecified);
 				}
                 return VSConstants.E_FAIL;
             }
@@ -84,10 +88,12 @@ namespace BadListener.Extension
 			var lines = input.Split('\n');
 			var literals = new List<string>();
 			string model = null;
+			int lineCounter = 1;
 			foreach (string untrimmedLine in lines)
 			{
 				string line = untrimmedLine.Trim();
-				ProcessLine(line, builder, literals, ref model);
+				ProcessLine(line, lineCounter, builder, literals, ref model);
+				lineCounter++;
 			}
 			MergeAndEmitLiterals(literals, builder);
 			builder.DecreaseIndentation();
@@ -96,7 +102,7 @@ namespace BadListener.Extension
 			builder.PrependLine($"public override void Render({model} Model)");
 		}
 
-		private void ProcessLine(string line, CodeBuilder builder, List<string> literals, ref string model)
+		private void ProcessLine(string line, int lineCounter, CodeBuilder builder, List<string> literals, ref string model)
 		{
 			if (line == "{")
 			{
@@ -113,7 +119,7 @@ namespace BadListener.Extension
 				if (_ModelPattern.Matches(line))
 				{
 					if (model != null)
-						throw new CompilerException("Encountered multiple model definitions.");
+						throw new CompilerException("Encountered multiple model definitions.", lineCounter);
 					model = _ModelPattern.Group(1);
 				}
 				if (_StatementPattern.Matches(line))
@@ -123,7 +129,7 @@ namespace BadListener.Extension
 				}
 				else
 				{
-					throw new CompilerException("Unknown statement.");
+					throw new CompilerException("Unknown statement.", lineCounter);
 				}
 			}
 			else
