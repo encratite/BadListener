@@ -8,7 +8,9 @@ using System.Text;
 namespace BadListener.Extension
 {
     [ComVisible(true)]
-    [CodeGeneratorRegistrationAttribute(typeof(BadListenerGenerator), "BadListenerGenerator", "20443771-0bd7-4631-9a37-9f9ffe7c2a04")]
+    [Guid("717DB774-0CCA-42F2-885F-E211849C4FFD")]
+    [CodeGeneratorRegistration(typeof(BadListenerGenerator), "BadListenerGenerator", "{FAE04EC1-301F-11D3-BF4B-00C04F79EFBC}", GeneratesDesignTimeSource = true)]
+    [ProvideObject(typeof(BadListenerGenerator))]
     public class BadListenerGenerator : IVsSingleFileGenerator
     {
         #region Implementation of interface IVsSingleFileGenerator
