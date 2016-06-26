@@ -6,6 +6,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.IO;
 using VSLangProj80;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BadListener.Extension
 {
@@ -80,8 +82,48 @@ namespace BadListener.Extension
 				throw new CompilerException("No model has been set.");
 			builder.AppendLine($"public override void Render({model} Model)");
 			builder.IncreaseIndentation();
-			throw new NotImplementedException();
+			var lines = input.Split('\n');
+			var literals = new List<string>();
+			foreach (string untrimmedLine in lines)
+			{
+				string line = untrimmedLine.Trim();
+				if (line == "{" || line == "}")
+				{
+					MergeAndEmitLiterals(literals, builder);
+				}
+				else
+				{
+					literals.Add(line);
+				}
+			}
+			MergeAndEmitLiterals(literals, builder);
 			builder.DecreaseIndentation();
+			throw new NotImplementedException();
+		}
+
+		private void MergeAndEmitLiterals(List<string> literals, CodeBuilder builder)
+		{
+			if (!literals.Any())
+				return;
+			string mergedLiterals = string.Join("\n", literals);
+			string escapedString = EscapeString(mergedLiterals);
+			builder.AppendLine($"Write(\"{escapedString}\");");
+			literals.Clear();
+		}
+
+		private string EscapeString(string input)
+		{
+			var replacements = new StringReplacement[]
+			{
+				new StringReplacement("\\", "\\\\"),
+				new StringReplacement("\r", "\\r"),
+				new StringReplacement("\n", "\\n"),
+				new StringReplacement("\"", "\\\""),
+			};
+			string output = input;
+			foreach (var replacement in replacements)
+				output = replacement.Execute(output);
+			return output;
 		}
     }
 }
