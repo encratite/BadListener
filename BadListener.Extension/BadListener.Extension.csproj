@@ -136,6 +136,7 @@
   <ItemGroup>
     <Compile Include="BadListenerGenerator.cs" />
     <Compile Include="CodeBuilder.cs" />
+    <Compile Include="CodeGenerator.cs" />
     <Compile Include="CompilerException.cs" />
     <Compile Include="MatchState.cs" />
     <Compile Include="StringReplacement.cs" />
