@@ -14,6 +14,7 @@ namespace BadListener.Extension
 		{
 			InitializeState();
 			SetLines(input);
+			GenerateUsingStatements();
 			_Builder.AppendLine($"namespace {@namespace}");
 			_Builder.IncreaseIndentation();
 			_Builder.AppendLine($"class {viewName} : View");
@@ -35,7 +36,7 @@ namespace BadListener.Extension
 
 		private void GenerateUsingStatements()
 		{
-			AddNamespace("BadListener");
+			GenerateDefaultUsingStatements();
 			var usingPattern = new MatchState("^@using (.+)$");
 			var newLines = new List<string>();
 			foreach (string line in _Lines)
@@ -52,6 +53,21 @@ namespace BadListener.Extension
 			}
 			_Lines = newLines;
 			_Builder.AppendLine();
+		}
+
+		private void GenerateDefaultUsingStatements()
+		{
+			var defaultNamespaces = new string[]
+			{
+				"BadListener",
+				"System",
+				"System.Collections.Generic",
+				"System.Linq",
+				"System.Text",
+				// "System.Threading.Tasks",
+			};
+			foreach (string @namespace in defaultNamespaces)
+				AddNamespace(@namespace);
 		}
 
 		private void GenerateRenderFunction()
@@ -94,7 +110,7 @@ namespace BadListener.Extension
 		private void ProcessLine(string line)
 		{
 			var sectionPattern = new MatchState("^@section (.+)$");
-			var statementPattern = new MatchState(@"^@(if|for|foreach|while\s*\(.+\))$");
+			var statementPattern = new MatchState(@"^@((?:if|for|foreach|while)\s*\(.+\))$");
 			if (line == "{")
 			{
 				MergeAndEmitLiterals();
@@ -107,6 +123,7 @@ namespace BadListener.Extension
 			}
 			else if (line.Length > 0 && line[0] == '@')
 			{
+				MergeAndEmitLiterals();
 				if (sectionPattern.Matches(line))
 				{
 					string section = sectionPattern.Group(1);
