@@ -8,7 +8,7 @@ namespace BadListener.Extension
 	{
 		private StringBuilder _StringBuilder = new StringBuilder();
 		private int _IndentationLevel = 0;
-        private HashSet<int> _LambdaIndentationLevels = new HashSet<int>();
+		private HashSet<int> _LambdaIndentationLevels = new HashSet<int>();
 
 		public void AppendLine(string line = "")
 		{
@@ -33,21 +33,21 @@ namespace BadListener.Extension
 			if (_IndentationLevel <= 0)
 				throw new ApplicationException("Negative indentation level.");
 			_IndentationLevel--;
-            if (_LambdaIndentationLevels.Contains(_IndentationLevel))
-            {
-			    AppendLine("});");
-                _LambdaIndentationLevels.Remove(_IndentationLevel);
-            }
-            else
-            {
-                AppendLine("}");
-            }
+			if (_LambdaIndentationLevels.Contains(_IndentationLevel))
+			{
+				AppendLine("});");
+				_LambdaIndentationLevels.Remove(_IndentationLevel);
+			}
+			else
+			{
+				AppendLine("}");
+			}
 		}
 
-        public void AddLambdaIndentationLevel()
-        {
-            _LambdaIndentationLevels.Add(_IndentationLevel);
-        }
+		public void AddLambdaIndentationLevel()
+		{
+			_LambdaIndentationLevels.Add(_IndentationLevel);
+		}
 
 		public override string ToString()
 		{

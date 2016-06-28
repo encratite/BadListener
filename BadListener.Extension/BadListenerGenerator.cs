@@ -9,7 +9,7 @@ using VSLangProj80;
 
 namespace BadListener.Extension
 {
-    [ComVisible(true)]
+	[ComVisible(true)]
 	[Guid("717DB774-0CCA-42F2-885F-E211849C4FFD")]
 	[CodeGeneratorRegistration(typeof(BadListenerGenerator), "BadListenerGenerator", vsContextGuids.vsContextGuidVCSProject, GeneratesDesignTimeSource = true)]
 	[ProvideObject(typeof(BadListenerGenerator))]
