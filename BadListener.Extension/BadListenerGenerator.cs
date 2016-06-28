@@ -2,16 +2,14 @@
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using System;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.IO;
 using VSLangProj80;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace BadListener.Extension
 {
-	[ComVisible(true)]
+    [ComVisible(true)]
 	[Guid("717DB774-0CCA-42F2-885F-E211849C4FFD")]
 	[CodeGeneratorRegistration(typeof(BadListenerGenerator), "BadListenerGenerator", vsContextGuids.vsContextGuidVCSProject, GeneratesDesignTimeSource = true)]
 	[ProvideObject(typeof(BadListenerGenerator))]
