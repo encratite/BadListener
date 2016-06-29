@@ -44,7 +44,7 @@ namespace BadListener.Extension
 			}
 		}
 
-		public void AddLambdaIndentationLevel()
+		public void MarkLambdaIndentationLevel()
 		{
 			_LambdaIndentationLevels.Add(_IndentationLevel);
 		}
