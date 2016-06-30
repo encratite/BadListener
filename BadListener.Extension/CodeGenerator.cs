@@ -14,28 +14,30 @@ namespace BadListener.Extension
 		private int _LineCounter;
 
 		public string GenerateCode(string viewName, string input, string @namespace)
-		{
-			InitializeState();
-			SetLines(input);
-			GenerateUsingStatements();
-			_Builder.AppendLine($"namespace {@namespace}");
-			_Builder.IncreaseIndentation();
-			_Builder.AppendLine($"class {viewName} : View");
-			_Builder.IncreaseIndentation();
-			GenerateRenderFunction();
-			_Builder.DecreaseIndentation();
-			_Builder.DecreaseIndentation();
-			string output = _Builder.ToString();
-			return output;
-		}
+        {
+            InitializeState();
+            SetLines(input);
+            GenerateUsingStatements();
+            GenerateNamespace(viewName, @namespace);
+            string output = _Builder.ToString();
+            return output;
+        }
 
-		private void InitializeState()
+        private void InitializeState()
 		{
 			_Builder = new CodeBuilder();
 			_Literals = new List<string>();
 			_LineCounter = 1;
 			_Lines = new List<string>();
 		}
+
+        private void GenerateNamespace(string viewName, string @namespace)
+        {
+            _Builder.AppendLine($"namespace {@namespace}");
+            _Builder.IncreaseIndentation();
+            GenerateClass(viewName);
+            _Builder.DecreaseIndentation();
+        }
 
 		private void GenerateUsingStatements()
 		{
@@ -75,7 +77,7 @@ namespace BadListener.Extension
 
 		private void GenerateRenderFunction()
 		{
-			GenerateRenderSignature();
+			_Builder.AppendLine("public override void Render()");
 			_Builder.IncreaseIndentation();
 			foreach (string line in _Lines)
 			{
@@ -86,7 +88,7 @@ namespace BadListener.Extension
 			_Builder.DecreaseIndentation();
 		}
 
-		private void GenerateRenderSignature()
+		private void GenerateClass(string viewName)
 		{
 			string model = null;
 			var modelPattern = new MatchState("^" + RazorPrefix + "model (.+)$");
@@ -107,7 +109,10 @@ namespace BadListener.Extension
 			_Lines = newLines;
 			if (model == null)
 				throw new CompilerException("No model has been set.");
-			_Builder.AppendLine($"public override void Render({model} Model)");
+            _Builder.AppendLine($"class {viewName} : View<{model}>");
+			_Builder.IncreaseIndentation();
+			GenerateRenderFunction();
+			_Builder.DecreaseIndentation();
 		}
 
 		private void ProcessLine(string line)
@@ -161,20 +166,20 @@ namespace BadListener.Extension
                 var literalGroup = groups[0];
                 var expressionGroup = groups[1];
                 var extendedExpressionGroup = groups[2];
-                if (literalGroup.Success)
+                if (extendedExpressionGroup.Success)
                 {
-                    string literal = literalGroup.Value;
-                    _Literals.Add(literal);
+                    MergeAndEmitLiterals();
+                    GenerateWrite(extendedExpressionGroup.Value);
                 }
                 else if (expressionGroup.Success)
                 {
                     MergeAndEmitLiterals();
                     GenerateWrite(expressionGroup.Value);
                 }
-                else if (extendedExpressionGroup.Success)
+                else if (literalGroup.Success)
                 {
-                    MergeAndEmitLiterals();
-                    GenerateWrite(extendedExpressionGroup.Value);
+                    string literal = literalGroup.Value;
+                    _Literals.Add(literal);
                 }
             }
         }
