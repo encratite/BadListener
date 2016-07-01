@@ -136,7 +136,7 @@ namespace BadListener.Extension
 				string section = sectionPattern.Group(1);
 				string escapedSection = EscapeString(section);
 				_Builder.AppendLine($"DefineSection(\"{escapedSection}\", () =>");
-				_Builder.MarkLambdaIndentationLevel();
+				_Builder.EnterSection();
 			}
 			else if (blockPattern.Matches(line))
 			{
