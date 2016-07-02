@@ -6,7 +6,7 @@ namespace BadListener.Extension
 {
 	class CodeGenerator
 	{
-        private const string RazorPrefix = "@";
+		private const string RazorPrefix = "@";
 
 		private List<string> _Lines;
 		private CodeBuilder _Builder;
@@ -14,16 +14,16 @@ namespace BadListener.Extension
 		private int _LineCounter;
 
 		public string GenerateCode(string viewName, string input, string @namespace)
-        {
-            InitializeState();
-            SetLines(input);
-            GenerateUsingStatements();
-            GenerateNamespace(viewName, @namespace);
-            string output = _Builder.ToString();
-            return output;
-        }
+		{
+			InitializeState();
+			SetLines(input);
+			GenerateUsingStatements();
+			GenerateNamespace(viewName, @namespace);
+			string output = _Builder.ToString();
+			return output;
+		}
 
-        private void InitializeState()
+		private void InitializeState()
 		{
 			_Builder = new CodeBuilder();
 			_Literals = new List<string>();
@@ -31,13 +31,13 @@ namespace BadListener.Extension
 			_Lines = new List<string>();
 		}
 
-        private void GenerateNamespace(string viewName, string @namespace)
-        {
-            _Builder.AppendLine($"namespace {@namespace}");
-            _Builder.IncreaseIndentation();
-            GenerateClass(viewName);
-            _Builder.DecreaseIndentation();
-        }
+		private void GenerateNamespace(string viewName, string @namespace)
+		{
+			_Builder.AppendLine($"namespace {@namespace}");
+			_Builder.IncreaseIndentation();
+			GenerateClass(viewName);
+			_Builder.DecreaseIndentation();
+		}
 
 		private void GenerateUsingStatements()
 		{
@@ -109,7 +109,7 @@ namespace BadListener.Extension
 			_Lines = newLines;
 			if (model == null)
 				throw new CompilerException("No model has been set.");
-            _Builder.AppendLine($"class {viewName} : View<{model}>");
+			_Builder.AppendLine($"class {viewName} : View<{model}>");
 			_Builder.IncreaseIndentation();
 			GenerateRenderFunction();
 			_Builder.DecreaseIndentation();
@@ -119,7 +119,7 @@ namespace BadListener.Extension
 		{
 			var sectionPattern = new MatchState("^" + RazorPrefix + "section (.+)$");
 			var blockPattern = new MatchState("^" + RazorPrefix + "((?:if|for|foreach|while)\\s*\\(.+\\))$");
-            var callPattern = new MatchState("^" + RazorPrefix + "(.*)$");
+			var callPattern = new MatchState("^" + RazorPrefix + "(.*)$");
 			if (line == "{")
 			{
 				MergeAndEmitLiterals();
@@ -132,7 +132,7 @@ namespace BadListener.Extension
 			}
 			else if (sectionPattern.Matches(line))
 			{
-                MergeAndEmitLiterals();
+				MergeAndEmitLiterals();
 				string section = sectionPattern.Group(1);
 				string escapedSection = EscapeString(section);
 				_Builder.AppendLine($"DefineSection(\"{escapedSection}\", () =>");
@@ -140,51 +140,51 @@ namespace BadListener.Extension
 			}
 			else if (blockPattern.Matches(line))
 			{
-                MergeAndEmitLiterals();
+				MergeAndEmitLiterals();
 				string block = blockPattern.Group(1);
 				_Builder.AppendLine(block);
 			}
 			else if (callPattern.Matches(line))
 			{
-                MergeAndEmitLiterals();
-                string call = callPattern.Group(1);
+				MergeAndEmitLiterals();
+				string call = callPattern.Group(1);
 				_Builder.AppendLine($"{call};");
 			}
 			else
-            {
-                ProcesLiteralsAndInlineStatements(line);
-            }
-        }
+			{
+				ProcesLiteralsAndInlineStatements(line);
+			}
+		}
 
-        private void ProcesLiteralsAndInlineStatements(string line)
-        {
-            var inlinePattern = new Regex("[^" + RazorPrefix + "]+|" + RazorPrefix + "([A-Za-z0-9_.\\[\\]]+)|" + RazorPrefix + "{(.+?)}");
-            var matches = inlinePattern.Matches(line + "\n");
-            foreach (Match match in matches)
-            {
-                var groups = match.Groups;
-                var literalGroup = groups[0];
-                var expressionGroup = groups[1];
-                var extendedExpressionGroup = groups[2];
-                if (extendedExpressionGroup.Success)
-                {
-                    MergeAndEmitLiterals();
-                    GenerateWrite(extendedExpressionGroup.Value);
-                }
-                else if (expressionGroup.Success)
-                {
-                    MergeAndEmitLiterals();
-                    GenerateWrite(expressionGroup.Value);
-                }
-                else if (literalGroup.Success)
-                {
-                    string literal = literalGroup.Value;
-                    _Literals.Add(literal);
-                }
-            }
-        }
+		private void ProcesLiteralsAndInlineStatements(string line)
+		{
+			var inlinePattern = new Regex("[^" + RazorPrefix + "]+|" + RazorPrefix + "([A-Za-z0-9_.\\[\\]]+)|" + RazorPrefix + "{(.+?)}");
+			var matches = inlinePattern.Matches(line + "\n");
+			foreach (Match match in matches)
+			{
+				var groups = match.Groups;
+				var literalGroup = groups[0];
+				var expressionGroup = groups[1];
+				var extendedExpressionGroup = groups[2];
+				if (extendedExpressionGroup.Success)
+				{
+					MergeAndEmitLiterals();
+					GenerateWrite(extendedExpressionGroup.Value);
+				}
+				else if (expressionGroup.Success)
+				{
+					MergeAndEmitLiterals();
+					GenerateWrite(expressionGroup.Value);
+				}
+				else if (literalGroup.Success)
+				{
+					string literal = literalGroup.Value;
+					_Literals.Add(literal);
+				}
+			}
+		}
 
-        private void MergeAndEmitLiterals()
+		private void MergeAndEmitLiterals()
 		{
 			if (!_Literals.Any())
 				return;
@@ -229,9 +229,9 @@ namespace BadListener.Extension
 			_Builder.AppendLine($"using {@namespace};");
 		}
 
-        private void GenerateWrite(string expression)
-        {
-            _Builder.AppendLine($"Write({expression});");
-        }
+		private void GenerateWrite(string expression)
+		{
+			_Builder.AppendLine($"Write({expression});");
+		}
 	}
 }
