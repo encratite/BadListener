@@ -18,7 +18,7 @@ namespace BadListener.Extension
 			return _Match.Success;
 		}
 
-		public string Group(int index)
+		public string GetGroup(int index)
 		{
 			return _Match.Groups[index].Value;
 		}

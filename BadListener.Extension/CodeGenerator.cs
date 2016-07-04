@@ -6,7 +6,7 @@ namespace BadListener.Extension
 {
 	class CodeGenerator
 	{
-		private const string RazorPrefix = "@";
+		private const string _Prefix = "@";
 
 		private List<string> _Lines;
 		private CodeBuilder _Builder;
@@ -42,13 +42,13 @@ namespace BadListener.Extension
 		private void GenerateUsingStatements()
 		{
 			GenerateDefaultUsingStatements();
-			var usingPattern = new MatchState("^" + RazorPrefix + "using (.+)$");
+			var usingPattern = new MatchState("^" + _Prefix + "using (.+)$");
 			var newLines = new List<string>();
 			foreach (string line in _Lines)
 			{
 				if (usingPattern.Matches(line))
 				{
-					string @namespace = usingPattern.Group(1);
+					string @namespace = usingPattern.GetGroup(1);
 					AddNamespace(@namespace);
 				}
 				else
@@ -91,7 +91,7 @@ namespace BadListener.Extension
 		private void GenerateClass(string viewName)
 		{
 			string model = null;
-			var modelPattern = new MatchState("^" + RazorPrefix + "model (.+)$");
+			var modelPattern = new MatchState("^" + _Prefix + "model (.+)$");
 			var newLines = new List<string>();
 			foreach (string line in _Lines)
 			{
@@ -99,7 +99,7 @@ namespace BadListener.Extension
 				{
 					if (model != null)
 						throw GetCompilerException("Encountered multiple model definitions.");
-					model = modelPattern.Group(1);
+					model = modelPattern.GetGroup(1);
 				}
 				else
 				{
@@ -111,15 +111,17 @@ namespace BadListener.Extension
 				throw new CompilerException("No model has been set.");
 			_Builder.AppendLine($"class {viewName} : View<{model}>");
 			_Builder.IncreaseIndentation();
+            _Builder.SetHelperOffset();
 			GenerateRenderFunction();
 			_Builder.DecreaseIndentation();
 		}
 
 		private void ProcessLine(string line)
 		{
-			var sectionPattern = new MatchState("^" + RazorPrefix + "section (.+)$");
-			var blockPattern = new MatchState("^" + RazorPrefix + "((?:if|for|foreach|while)\\s*\\(.+\\))$");
-			var callPattern = new MatchState("^" + RazorPrefix + "(.*)$");
+			var sectionPattern = new MatchState("^" + _Prefix + "section (.+)$");
+            var helperPattern = new MatchState("^" + _Prefix + "helper (.+)$");
+			var blockPattern = new MatchState("^" + _Prefix + "((?:if|for|foreach|while)\\s*\\(.+\\))$");
+			var callPattern = new MatchState("^" + _Prefix + "(.*)$");
 			if (line == "{")
 			{
 				MergeAndEmitLiterals();
@@ -133,21 +135,28 @@ namespace BadListener.Extension
 			else if (sectionPattern.Matches(line))
 			{
 				MergeAndEmitLiterals();
-				string section = sectionPattern.Group(1);
+				string section = sectionPattern.GetGroup(1);
 				string escapedSection = EscapeString(section);
 				_Builder.AppendLine($"DefineSection(\"{escapedSection}\", () =>");
 				_Builder.EnterSection();
 			}
+            else if (helperPattern.Matches(line))
+            {
+                MergeAndEmitLiterals();
+                string signature = helperPattern.GetGroup(1);
+                _Builder.EnterHelper();
+                _Builder.AppendLine($"public void {signature}");
+            }
 			else if (blockPattern.Matches(line))
 			{
 				MergeAndEmitLiterals();
-				string block = blockPattern.Group(1);
+				string block = blockPattern.GetGroup(1);
 				_Builder.AppendLine(block);
 			}
 			else if (callPattern.Matches(line))
 			{
 				MergeAndEmitLiterals();
-				string call = callPattern.Group(1);
+				string call = callPattern.GetGroup(1);
 				_Builder.AppendLine($"{call};");
 			}
 			else
@@ -158,7 +167,7 @@ namespace BadListener.Extension
 
 		private void ProcesLiteralsAndInlineStatements(string line)
 		{
-			var inlinePattern = new Regex("[^" + RazorPrefix + "]+|" + RazorPrefix + "([A-Za-z0-9_.\\[\\]]+)|" + RazorPrefix + "{(.+?)}");
+			var inlinePattern = new Regex("[^" + _Prefix + "]+|" + _Prefix + "([A-Za-z0-9_.\\[\\]]+)|" + _Prefix + "{(.+?)}");
 			var matches = inlinePattern.Matches(line + "\n");
 			foreach (Match match in matches)
 			{
@@ -186,11 +195,14 @@ namespace BadListener.Extension
 
 		private void MergeAndEmitLiterals()
 		{
-			if (!_Literals.Any())
-				return;
+            if (!_Literals.Any())
+                return;
 			string mergedLiterals = string.Join("", _Literals);
-			string escapedString = EscapeString(mergedLiterals);
-			GenerateWrite($"\"{escapedString}\"");
+            if (mergedLiterals.Length > 0 && mergedLiterals.Any(c => c != '\n'))
+            {
+			    string escapedString = EscapeString(mergedLiterals);
+			    GenerateWrite($"\"{escapedString}\"");
+            }
 			_Literals.Clear();
 		}
 

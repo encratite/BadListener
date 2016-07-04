@@ -42,17 +42,22 @@ namespace BadListener.Extension
 			{
 				AppendLine("}");
 				if (_HelperIndentationLevel == _IndentationLevel)
-				{
-					string helperBody = _HelperStringBuilder.ToString();
-					_StringBuilder.Insert(_HelperOffset.Value, helperBody);
-					_HelperOffset += helperBody.Length;
-					_HelperStringBuilder = null;
-					_HelperIndentationLevel = null;
-				}
-			}
+                    LeaveHelper();
+            }
 		}
 
-		public void SetHelperOffset()
+        private void LeaveHelper()
+        {
+            AppendLine();
+            string helperBody = _HelperStringBuilder.ToString();
+            _StringBuilder.Insert(_HelperOffset.Value, helperBody);
+            _HelperOffset += helperBody.Length;
+            _HelperStringBuilder = null;
+            _HelperIndentationLevel = null;
+            _IndentationLevel++;
+        }
+
+        public void SetHelperOffset()
 		{
 			_HelperOffset = _StringBuilder.Length;
 		}
@@ -65,6 +70,7 @@ namespace BadListener.Extension
 			if (_HelperStringBuilder != null)
 				throw new ArgumentException("Nesting helpers is not permitted.");
 			_HelperStringBuilder = new StringBuilder();
+            _IndentationLevel--;
 			_HelperIndentationLevel = _IndentationLevel;
 		}
 
