@@ -8,7 +8,7 @@ namespace BadListener.Tests
 		[Controller]
 		public void Index()
 		{
-			var context = Context.Current;
+			var context = Context.ListenerContext;
 			var request = context.Request;
 			string output = $"Time: {DateTimeOffset.Now}\n";
 			output += $"RawUrl: {request.RawUrl}\n";

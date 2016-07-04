@@ -61,6 +61,7 @@
     <Compile Include="HttpServer.cs" />
     <Compile Include="ControllerCacheEntry.cs" />
     <Compile Include="ServerError.cs" />
+    <Compile Include="View.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

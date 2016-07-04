@@ -54,7 +54,7 @@ namespace BadListener
 		{
 			try
 			{
-				Context.Current = context;
+				Context.ListenerContext = context;
 				ProcessRequest(context);
 			}
 			catch (Exception exception)
