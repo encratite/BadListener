@@ -111,7 +111,7 @@ namespace BadListener.Extension
 				throw new CompilerException("No model has been set.");
 			_Builder.AppendLine($"class {viewName} : View<{model}>");
 			_Builder.IncreaseIndentation();
-            _Builder.SetHelperOffset();
+			_Builder.SetHelperOffset();
 			GenerateRenderFunction();
 			_Builder.DecreaseIndentation();
 		}
@@ -119,7 +119,7 @@ namespace BadListener.Extension
 		private void ProcessLine(string line)
 		{
 			var sectionPattern = new MatchState("^" + _Prefix + "section (.+)$");
-            var helperPattern = new MatchState("^" + _Prefix + "helper (.+)$");
+			var helperPattern = new MatchState("^" + _Prefix + "helper (.+)$");
 			var blockPattern = new MatchState("^" + _Prefix + "((?:if|for|foreach|while)\\s*\\(.+\\))$");
 			var callPattern = new MatchState("^" + _Prefix + "(.*)$");
 			if (line == "{")
@@ -140,13 +140,13 @@ namespace BadListener.Extension
 				_Builder.AppendLine($"DefineSection(\"{escapedSection}\", () =>");
 				_Builder.EnterSection();
 			}
-            else if (helperPattern.Matches(line))
-            {
-                MergeAndEmitLiterals();
-                string signature = helperPattern.GetGroup(1);
-                _Builder.EnterHelper();
-                _Builder.AppendLine($"public void {signature}");
-            }
+			else if (helperPattern.Matches(line))
+			{
+				MergeAndEmitLiterals();
+				string signature = helperPattern.GetGroup(1);
+				_Builder.EnterHelper();
+				_Builder.AppendLine($"public void {signature}");
+			}
 			else if (blockPattern.Matches(line))
 			{
 				MergeAndEmitLiterals();
@@ -195,14 +195,14 @@ namespace BadListener.Extension
 
 		private void MergeAndEmitLiterals()
 		{
-            if (!_Literals.Any())
-                return;
+			if (!_Literals.Any())
+				return;
 			string mergedLiterals = string.Join("", _Literals);
-            if (mergedLiterals.Length > 0 && mergedLiterals.Any(c => c != '\n'))
-            {
-			    string escapedString = EscapeString(mergedLiterals);
-			    GenerateWrite($"\"{escapedString}\"");
-            }
+			if (mergedLiterals.Length > 0 && mergedLiterals.Any(c => c != '\n'))
+			{
+				string escapedString = EscapeString(mergedLiterals);
+				GenerateWrite($"\"{escapedString}\"");
+			}
 			_Literals.Clear();
 		}
 
