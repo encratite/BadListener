@@ -3,14 +3,24 @@
 namespace BadListener
 {
 	public abstract class View<TModel>
+        where TModel : class
 	{
 		protected TModel Model { get; set; }
 
-		public abstract void Render();
+        protected string Layout { get; set; }
+
+        public void Render(TModel model = null)
+        {
+            Model = model;
+            var layout = GetLayoutView();
+            throw new NotImplementedException();
+        }
+
+		protected abstract void Execute();
 
 		protected void Write(string literal)
 		{
-			Context.ResponseBuilder.Append(literal);
+			Context.Writer.Write(literal);
 		}
 
 		protected void RenderBody()
@@ -27,5 +37,15 @@ namespace BadListener
 		{
 			throw new NotImplementedException();
 		}
+
+        private View<object> GetLayoutView()
+        {
+            string typeName = Layout ?? $"{typeof(TModel).Namespace}.Layout";
+            var type = Type.GetType(typeName);
+            if (type == null)
+                return null;
+            var instance = (View<object>)Activator.CreateInstance(type);
+            return instance;
+        }
 	}
 }

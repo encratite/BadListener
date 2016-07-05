@@ -56,7 +56,5 @@ namespace BadListener.Extension
 		}
 
 		#endregion
-
-
 	}
 }

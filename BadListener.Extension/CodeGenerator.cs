@@ -33,10 +33,15 @@ namespace BadListener.Extension
 
 		private void GenerateNamespace(string viewName, string @namespace)
 		{
-			_Builder.AppendLine($"namespace {@namespace}");
-			_Builder.IncreaseIndentation();
+            bool useNamespace = !string.IsNullOrEmpty(@namespace);
+            if (useNamespace)
+            {
+			    _Builder.AppendLine($"namespace {@namespace}");
+			    _Builder.IncreaseIndentation();
+            }
 			GenerateClass(viewName);
-			_Builder.DecreaseIndentation();
+            if (useNamespace)
+			    _Builder.DecreaseIndentation();
 		}
 
 		private void GenerateUsingStatements()
@@ -69,7 +74,6 @@ namespace BadListener.Extension
 				"System.Collections.Generic",
 				"System.Linq",
 				"System.Text",
-				// "System.Threading.Tasks",
 			};
 			foreach (string @namespace in defaultNamespaces)
 				AddNamespace(@namespace);
@@ -77,7 +81,7 @@ namespace BadListener.Extension
 
 		private void GenerateRenderFunction()
 		{
-			_Builder.AppendLine("public override void Render()");
+			_Builder.AppendLine("protected override void Execute()");
 			_Builder.IncreaseIndentation();
 			foreach (string line in _Lines)
 			{
@@ -90,7 +94,7 @@ namespace BadListener.Extension
 
 		private void GenerateClass(string viewName)
 		{
-			string model = null;
+			string model = "object";
 			var modelPattern = new MatchState("^" + _Prefix + "model (.+)$");
 			var newLines = new List<string>();
 			foreach (string line in _Lines)
@@ -107,8 +111,6 @@ namespace BadListener.Extension
 				}
 			}
 			_Lines = newLines;
-			if (model == null)
-				throw new CompilerException("No model has been set.");
 			_Builder.AppendLine($"class {viewName} : View<{model}>");
 			_Builder.IncreaseIndentation();
 			_Builder.SetHelperOffset();

@@ -54,7 +54,7 @@ namespace BadListener
 		{
 			try
 			{
-				Context.ListenerContext = context;
+				Context.Initialize(context);
 				ProcessRequest(context);
 			}
 			catch (Exception exception)
@@ -66,6 +66,10 @@ namespace BadListener
 					message = "An internal server error occurred.";
 				context.Response.SetStringResponse(message, "text/plain");
 			}
+            finally
+            {
+                Context.Dispose();
+            }
 		}
 
 		private void ProcessRequest(HttpListenerContext context)
