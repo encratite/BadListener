@@ -1,18 +1,20 @@
 ﻿using System;
+using System.Text;
 
 namespace BadListener
 {
 	public abstract class View<TModel>
         where TModel : class
 	{
+		private StringBuilder _StringBuilder = new StringBuilder();
+
 		protected TModel Model { get; set; }
 
         protected string Layout { get; set; }
 
-        public void Render(TModel model = null)
+        public string Render(TModel model)
         {
             Model = model;
-            var layout = GetLayoutView();
             throw new NotImplementedException();
         }
 
@@ -20,7 +22,7 @@ namespace BadListener
 
 		protected void Write(string literal)
 		{
-			Context.Writer.Write(literal);
+			_StringBuilder.Append(literal);
 		}
 
 		protected void RenderBody()

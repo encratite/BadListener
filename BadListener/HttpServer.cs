@@ -14,14 +14,15 @@ namespace BadListener
 		private HttpListener _Listener;
 		private List<Thread> _RequestThreads = new List<Thread>();
 
-		private object _RequestHandler;
 		private Dictionary<string, ControllerCacheEntry> _ControllerCache = new Dictionary<string, ControllerCacheEntry>();
+
+		public object RequestHandler { get; private set; }
 
 		public HttpServer(string prefix, object requestHandler)
 		{
 			_Listener = new HttpListener();
 			_Listener.Prefixes.Add(prefix);
-			_RequestHandler = requestHandler;
+			RequestHandler = requestHandler;
 			SetControllerCache();
 		}
 
@@ -87,12 +88,12 @@ namespace BadListener
 				throw new ServerError("No such controller.");
 			Type modelType;
 			var model = Invoke(entry.Method, request, out modelType);
-			entry.Attribute.Render(model, context.Response, this);
+			entry.Attribute.Render(name, model, context, this);
 		}
 
 		private void SetControllerCache()
 		{
-			var type = _RequestHandler.GetType();
+			var type = RequestHandler.GetType();
 			var methodInfos = type.GetMethods(BindingFlags.Instance | BindingFlags.Public);
 			foreach (var method in methodInfos)
 			{
@@ -110,7 +111,7 @@ namespace BadListener
 			var invokeParameters = new List<object>();
 			foreach (var parameter in parameters)
 				SetParameter(request, invokeParameters, parameter);
-			var output = method.Invoke(_RequestHandler, invokeParameters.ToArray());
+			var output = method.Invoke(RequestHandler, invokeParameters.ToArray());
 			modelType = method.ReturnType;
 			return output;
 		}

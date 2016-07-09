@@ -7,30 +7,16 @@ namespace BadListener
     public class Context
 	{
 		[ThreadStatic]
-		public static HttpListenerContext ListenerContext = null;
+		public static HttpListenerContext Current = null;
 
-		[ThreadStatic]
-		public static StreamWriter Writer = null;
-
-        public static void Initialize(HttpListenerContext listenerContext)
+        public static void Initialize(HttpListenerContext context)
         {
-            ListenerContext = listenerContext;
-            var memoryStream = new MemoryStream();
-            Writer = new StreamWriter(memoryStream);
+            Current = context;
         }
 
         public static void Dispose()
         {
-            try
-            {
-                if (Writer != null)
-                    Writer.Dispose();
-                Writer = null;
-                ListenerContext = null;
-            }
-            catch
-            {
-            }
+            Current = null;
         }
 	}
 }
