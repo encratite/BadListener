@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using BadListener.Attribute;
+using BadListener.Error;
 
 namespace BadListener
 {

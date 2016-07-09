@@ -19,6 +19,8 @@ namespace BadListener
 
         protected string Layout { get; set; }
 
+		protected dynamic ViewBag { get; set; } = new dynamic();
+
         public string Render(TModel model)
         {
             Model = model;
@@ -27,7 +29,7 @@ namespace BadListener
 			var layout = GetLayoutView();
 			if (layout == null)
 				return body;
-			string content = layout.RenderLayout(body, _Sections);
+			string content = layout.RenderLayout(body, _Sections, ViewBag);
 			return content;
         }
 
@@ -71,10 +73,11 @@ namespace BadListener
             return instance;
         }
 
-		private string RenderLayout(string body, List<Section> sections)
+		private string RenderLayout(string body, List<Section> sections, dynamic viewBag)
 		{
 			_Body = body;
 			_Sections = sections;
+			ViewBag = viewBag;
 			Execute();
 			string content = _StringBuilder.ToString();
 			return content;

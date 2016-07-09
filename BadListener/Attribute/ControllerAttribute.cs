@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Net;
+using BadListener.Error;
 
 namespace BadListener.Attribute
 {
@@ -12,7 +13,7 @@ namespace BadListener.Attribute
 			var assemblyTypes = handlerType.Assembly.GetExportedTypes();
 			var viewType = assemblyTypes.Where(type => type.BaseType == typeof(View<>) && type.Name == name).FirstOrDefault();
 			if (viewType == null)
-				throw new ServerError("Unable to find a corresponding view.");
+				throw new ViewError("Unable to find a corresponding view.");
 			var method = viewType.GetMethod("Render");
 			var instance = Activator.CreateInstance(viewType);
 			var arguments = new object[] { model };
