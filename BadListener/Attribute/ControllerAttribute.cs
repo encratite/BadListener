@@ -9,7 +9,7 @@ namespace BadListener.Attribute
 		public override void Render(string name, object model, HttpListenerContext context, HttpServer server)
 		{
 			var handlerType = server.RequestHandler.GetType();
-			var assemblyTypes = handlerType.Assembly.GetTypes();
+			var assemblyTypes = handlerType.Assembly.GetExportedTypes();
 			var viewType = assemblyTypes.Where(type => type.BaseType == typeof(View<>) && type.Name == name).FirstOrDefault();
 			if (viewType == null)
 				throw new ServerError("Unable to find a corresponding view.");

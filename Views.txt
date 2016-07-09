@@ -1,0 +1,13 @@
+Workflow for rendering views:
+
+* The listener wrapper determines the controller whose name matches that of the incoming request using reflection and has it generate the model
+* The attribute invokes the controller
+* The controller generates and returns a model
+* The attribute uses reflection to get the type of its corresponding view, creates an instance of it and calls its string Render(TModel model) function
+* The view renders to an internal StringBuilder and defines its sections
+* If the view has no layout associated with it, it returns the contents of its StringBuilder
+* If the view has been associated with a layout, it uses reflection to get the type of its layout, creates an instance of it and calls its string 
+RenderLayout(string body, List<Section> sections) function
+* The layout renders to an internal StringBuilder and returns its contents
+* The view returns the same string
+* The attribute turns the string into a byte array (UTF-8) and writes it to the response stream

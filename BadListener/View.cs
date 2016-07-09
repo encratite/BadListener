@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using BadListener.Error;
 
 namespace BadListener
 {
@@ -8,6 +11,10 @@ namespace BadListener
 	{
 		private StringBuilder _StringBuilder = new StringBuilder();
 
+		private List<Section> _Sections = new List<Section>();
+
+		private string _Body = null;
+
 		protected TModel Model { get; set; }
 
         protected string Layout { get; set; }
@@ -15,7 +22,13 @@ namespace BadListener
         public string Render(TModel model)
         {
             Model = model;
-            throw new NotImplementedException();
+			Execute();
+			string body = _StringBuilder.ToString();
+			var layout = GetLayoutView();
+			if (layout == null)
+				return body;
+			string content = layout.RenderLayout(body, _Sections);
+			return content;
         }
 
 		protected abstract void Execute();
@@ -27,17 +40,25 @@ namespace BadListener
 
 		protected void RenderBody()
 		{
-			throw new NotImplementedException();
+			if (_Body == null)
+				throw new ViewError("No body has been defined.");
+			Write(_Body);
 		}
 
-		protected void DefineSection(string name, Action body)
+		protected void DefineSection(string name, Action render)
 		{
-			throw new NotImplementedException();
+			if (_Sections.Any(s => s.Name == name))
+				throw new ViewError($"Section \"{name}\" had already been defined.");
+			var section = new Section(name, render);
+			_Sections.Add(section);
 		}
 
 		protected void RenderSection(string name)
 		{
-			throw new NotImplementedException();
+			var section = _Sections.FirstOrDefault(s => s.Name == name);
+			if (section == null)
+				throw new ViewError($"Unable to find section \"{name}\"");
+			section.Render();
 		}
 
         private View<object> GetLayoutView()
@@ -49,5 +70,14 @@ namespace BadListener
             var instance = (View<object>)Activator.CreateInstance(type);
             return instance;
         }
+
+		private string RenderLayout(string body, List<Section> sections)
+		{
+			_Body = body;
+			_Sections = sections;
+			Execute();
+			string content = _StringBuilder.ToString();
+			return content;
+		}
 	}
 }

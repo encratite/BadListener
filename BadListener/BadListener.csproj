@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
+    <Folder Include="Error\" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attribute\BaseControllerAttribute.cs" />
@@ -56,8 +57,10 @@
     <Compile Include="HttpListenerResponseExtension.cs" />
     <Compile Include="HttpServer.cs" />
     <Compile Include="ControllerCacheEntry.cs" />
-    <Compile Include="ServerError.cs" />
     <Compile Include="View.cs" />
+    <Compile Include="Section.cs" />
+    <Compile Include="Error\ServerError.cs" />
+    <Compile Include="Error\ViewError.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

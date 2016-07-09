@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BadListener
+namespace BadListener.Error
 {
 	class ServerError : Exception
 	{
