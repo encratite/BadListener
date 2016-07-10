@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Text;
 using BadListener.Error;
@@ -19,7 +20,7 @@ namespace BadListener
 
         protected string Layout { get; set; }
 
-		protected dynamic ViewBag { get; set; } = new dynamic();
+		protected dynamic ViewBag { get; set; } = new ExpandoObject();
 
         public string Render(TModel model)
         {
