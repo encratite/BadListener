@@ -8,7 +8,7 @@ using BadListener.Error;
 namespace BadListener
 {
 	public abstract class View<TModel>
-        where TModel : class
+		where TModel : class
 	{
 		private StringBuilder _StringBuilder = new StringBuilder();
 
@@ -18,13 +18,13 @@ namespace BadListener
 
 		protected TModel Model { get; set; }
 
-        protected string Layout { get; set; }
+		protected string Layout { get; set; }
 
 		protected dynamic ViewBag { get; set; } = new ExpandoObject();
 
-        public string Render(TModel model)
-        {
-            Model = model;
+		public string Render(TModel model)
+		{
+			Model = model;
 			Execute();
 			string body = _StringBuilder.ToString();
 			var layout = GetLayoutView();
@@ -32,7 +32,7 @@ namespace BadListener
 				return body;
 			string content = layout.RenderLayout(body, _Sections, ViewBag);
 			return content;
-        }
+		}
 
 		protected abstract void Execute();
 
@@ -64,15 +64,15 @@ namespace BadListener
 			section.Render();
 		}
 
-        private View<object> GetLayoutView()
-        {
-            string typeName = Layout ?? $"{typeof(TModel).Namespace}.Layout";
-            var type = Type.GetType(typeName);
-            if (type == null)
-                return null;
-            var instance = (View<object>)Activator.CreateInstance(type);
-            return instance;
-        }
+		private View<object> GetLayoutView()
+		{
+			string typeName = Layout ?? $"{typeof(TModel).Namespace}.Layout";
+			var type = Type.GetType(typeName);
+			if (type == null)
+				return null;
+			var instance = (View<object>)Activator.CreateInstance(type);
+			return instance;
+		}
 
 		private string RenderLayout(string body, List<Section> sections, dynamic viewBag)
 		{

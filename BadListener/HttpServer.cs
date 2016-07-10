@@ -68,10 +68,10 @@ namespace BadListener
 					message = "An internal server error occurred.";
 				context.Response.SetStringResponse(message, "text/plain");
 			}
-            finally
-            {
-                Context.Dispose();
-            }
+			finally
+			{
+				Context.Dispose();
+			}
 		}
 
 		private void ProcessRequest(HttpListenerContext context)
