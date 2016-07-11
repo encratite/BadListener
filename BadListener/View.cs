@@ -36,9 +36,10 @@ namespace BadListener
 
 		protected abstract void Execute();
 
-		protected void Write(string literal)
+		protected void Write(object literal)
 		{
-			_StringBuilder.Append(literal);
+            if (literal != null)
+			    _StringBuilder.Append(literal.ToString());
 		}
 
 		protected void RenderBody()

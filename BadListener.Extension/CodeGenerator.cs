@@ -111,7 +111,7 @@ namespace BadListener.Extension
 				}
 			}
 			_Lines = newLines;
-			_Builder.AppendLine($"class {viewName} : View<{model}>");
+			_Builder.AppendLine($"public class {viewName} : View<{model}>");
 			_Builder.IncreaseIndentation();
 			_Builder.SetHelperOffset();
 			GenerateRenderFunction();
