@@ -148,6 +148,7 @@
     <When Condition="Exists($(VsSdkTargets))">
       <ItemGroup>
         <None Include="source.extension.vsixmanifest" />
+        <VSIXSourceItem Include="LICENSE.txt" />
       </ItemGroup>
     </When>
     <Otherwise>

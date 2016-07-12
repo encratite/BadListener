@@ -12,7 +12,7 @@ namespace BadListener
 {
 	public class HttpServer : IDisposable
 	{
-		private HttpListener _Listener;
+        private HttpListener _Listener;
 		private List<Thread> _RequestThreads = new List<Thread>();
 
 		private Dictionary<string, ControllerCacheEntry> _ControllerCache = new Dictionary<string, ControllerCacheEntry>();
@@ -66,7 +66,7 @@ namespace BadListener
 					message = exception.Message;
 				else
 					message = "An internal server error occurred.";
-				context.Response.SetStringResponse(message, "text/plain");
+				context.Response.SetStringResponse(message, MimeType.Plain);
 			}
 			finally
 			{
@@ -77,6 +77,13 @@ namespace BadListener
 		private void ProcessRequest(HttpListenerContext context)
 		{
 			var request = context.Request;
+            if (request.RawUrl == "/favicon.ico")
+            {
+                var response = context.Response;
+                response.StatusCode = 404;
+                response.SetStringResponse("Not found.", MimeType.Plain);
+                return;
+            }
 			var pattern = new Regex("^/([A-Za-z0-9]*)");
 			var match = pattern.Match(request.RawUrl);
 			if (match == null)

@@ -94,7 +94,7 @@ namespace BadListener.Extension
 
 		private void GenerateClass(string viewName)
 		{
-			string model = "object";
+			string model = null;
 			var modelPattern = new MatchState("^" + _Prefix + "model (.+)$");
 			var newLines = new List<string>();
 			foreach (string line in _Lines)
@@ -110,6 +110,8 @@ namespace BadListener.Extension
 					newLines.Add(line);
 				}
 			}
+            if (model == null)
+                model = "object";
 			_Lines = newLines;
 			_Builder.AppendLine($"public class {viewName} : View<{model}>");
 			_Builder.IncreaseIndentation();

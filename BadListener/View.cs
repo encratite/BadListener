@@ -67,8 +67,9 @@ namespace BadListener
 
 		private View<object> GetLayoutView()
 		{
-			string typeName = Layout ?? $"{typeof(TModel).Namespace}.Layout";
-			var type = Type.GetType(typeName);
+            var viewType = GetType();
+			string typeName = Layout ?? $"{viewType.Namespace}.Layout";
+			var type = viewType.Assembly.GetType(typeName);
 			if (type == null)
 				return null;
 			var instance = (View<object>)Activator.CreateInstance(type);
