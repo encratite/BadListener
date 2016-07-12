@@ -1,22 +1,38 @@
 ﻿using System;
-using System.IO;
+using System.Diagnostics;
 using System.Net;
 
 namespace BadListener
 {
-	public class Context
+    public class Context
 	{
 		[ThreadStatic]
-		public static HttpListenerContext Current = null;
+		public static HttpListenerRequest Request = null;
 
-		public static void Initialize(HttpListenerContext context)
+        [ThreadStatic]
+        public static HttpListenerResponse Response = null;
+
+        [ThreadStatic]
+        public static Stopwatch Stopwatch = null;
+
+		public static void OnBeginRequest(HttpListenerContext context)
 		{
-			Current = context;
+			Request = context.Request;
+            Response = context.Response;
+            Stopwatch = new Stopwatch();
+            Stopwatch.Start();
 		}
+
+        public static void OnEndRequest()
+        {
+            Stopwatch.Stop();
+        }
 
 		public static void Dispose()
 		{
-			Current = null;
+            Stopwatch = null;
+            Response = null;
+            Request = null;
 		}
 	}
 }

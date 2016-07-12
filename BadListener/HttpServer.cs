@@ -1,17 +1,20 @@
-﻿using System;
+﻿using BadListener.Attribute;
+using BadListener.Error;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
-using BadListener.Attribute;
-using BadListener.Error;
 
 namespace BadListener
 {
-	public class HttpServer : IDisposable
+    public class HttpServer : IDisposable
 	{
+        public event Action OnBeginRequest;
+        public event Action OnEndRequest;
+
         private HttpListener _Listener;
 		private List<Thread> _RequestThreads = new List<Thread>();
 
@@ -38,25 +41,41 @@ namespace BadListener
 			while (true)
 			{
 				var context = _Listener.GetContext();
-				var requestThread = new Thread(() => OnRequest(context));
-				requestThread.Start();
-				_RequestThreads.Add(requestThread);
+                lock (this)
+                {
+				    var requestThread = new Thread(() => OnRequest(context));
+				    requestThread.Start();
+                    _RequestThreads = _RequestThreads.Where(t => t.ThreadState == ThreadState.Running).ToList();
+				    _RequestThreads.Add(requestThread);
+                }
 			}
 		}
 
 		public void Stop()
 		{
-			_Listener.Stop();
-			foreach (var thread in _RequestThreads)
-				thread.Abort();
-			_RequestThreads.Clear();
+            lock (this)
+            {
+			    _Listener.Stop();
+			    foreach (var thread in _RequestThreads)
+                {
+                    try
+                    {
+				        thread.Abort();
+                    }
+                    catch
+                    {
+                    }
+                }
+			    _RequestThreads.Clear();
+            }
 		}
 
 		private void OnRequest(HttpListenerContext context)
 		{
+            Context.OnBeginRequest(context);
+            OnBeginRequest?.Invoke();
 			try
 			{
-				Context.Initialize(context);
 				ProcessRequest(context);
 			}
 			catch (Exception exception)
@@ -68,22 +87,14 @@ namespace BadListener
 					message = "An internal server error occurred.";
 				context.Response.SetStringResponse(message, MimeType.Plain);
 			}
-			finally
-			{
-				Context.Dispose();
-			}
+            Context.OnEndRequest();
+            OnEndRequest?.Invoke();
+            Context.Dispose();
 		}
 
 		private void ProcessRequest(HttpListenerContext context)
 		{
 			var request = context.Request;
-            if (request.RawUrl == "/favicon.ico")
-            {
-                var response = context.Response;
-                response.StatusCode = 404;
-                response.SetStringResponse("Not found.", MimeType.Plain);
-                return;
-            }
 			var pattern = new Regex("^/([A-Za-z0-9]*)");
 			var match = pattern.Match(request.RawUrl);
 			if (match == null)

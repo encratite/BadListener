@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System;       
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
@@ -10,28 +10,36 @@ namespace BadListener
 	public abstract class View<TModel>
 		where TModel : class
 	{
-		private StringBuilder _StringBuilder = new StringBuilder();
+		private StringBuilder _StringBuilder;
 
-		private List<Section> _Sections = new List<Section>();
+        private string _Body;
 
-		private string _Body = null;
+		private List<Section> _Sections;
 
 		protected TModel Model { get; set; }
 
-		protected string Layout { get; set; }
+        protected dynamic ViewBag { get; set; }
 
-		protected dynamic ViewBag { get; set; } = new ExpandoObject();
+		protected string Layout { get; set; }
 
 		public string Render(TModel model)
 		{
-			Model = model;
+            _StringBuilder = new StringBuilder();
+            _Sections = new List<Section>();
+            Model = model;
+            ViewBag = new ExpandoObject();
 			Execute();
 			string body = _StringBuilder.ToString();
 			var layout = GetLayoutView();
-			if (layout == null)
-				return body;
-			string content = layout.RenderLayout(body, _Sections, ViewBag);
-			return content;
+            string output = body;
+			if (layout != null)
+            {
+                _StringBuilder = new StringBuilder();
+			    string content = layout.RenderLayout(_StringBuilder, body, _Sections, ViewBag);
+                output = content;
+            }
+            Cleanup();
+            return output;
 		}
 
 		protected abstract void Execute();
@@ -76,14 +84,24 @@ namespace BadListener
 			return instance;
 		}
 
-		private string RenderLayout(string body, List<Section> sections, dynamic viewBag)
+		private string RenderLayout(StringBuilder stringBuilder, string body, List<Section> sections, dynamic viewBag)
 		{
+            _StringBuilder = stringBuilder;
 			_Body = body;
 			_Sections = sections;
 			ViewBag = viewBag;
 			Execute();
 			string content = _StringBuilder.ToString();
+            Cleanup();
 			return content;
 		}
+
+        private void Cleanup()
+        {
+            _StringBuilder = null;
+            _Sections = null;
+            Model = null;
+            ViewBag = null;
+        }
 	}
 }
