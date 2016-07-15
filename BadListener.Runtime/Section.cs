@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BadListener
+namespace BadListener.Runtime
 {
 	public class Section
 	{

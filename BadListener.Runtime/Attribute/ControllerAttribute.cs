@@ -1,11 +1,11 @@
-﻿using System;
+﻿using BadListener.Runtime.Error;
+using System;
 using System.Linq;
 using System.Net;
-using BadListener.Error;
 
-namespace BadListener.Attribute
+namespace BadListener.Runtime.Attribute
 {
-	public class ControllerAttribute : BaseControllerAttribute
+    public class ControllerAttribute : BaseControllerAttribute
 	{
 		public override void Render(string name, object model, HttpListenerContext context, HttpServer server)
 		{
@@ -23,7 +23,7 @@ namespace BadListener.Attribute
 			var instance = Activator.CreateInstance(viewType);
 			var arguments = new object[] { model };
 			string content = (string)method.Invoke(instance, arguments);
-			context.Response.SetStringResponse(content, MimeType.Html);
+			context.Response.SetStringResponse(content, MimeType.TextHtml);
 		}
 	}
 }

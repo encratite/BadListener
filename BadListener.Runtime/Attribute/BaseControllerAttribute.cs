@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace BadListener.Attribute
+namespace BadListener.Runtime.Attribute
 {
 	public abstract class BaseControllerAttribute : System.Attribute
 	{

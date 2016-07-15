@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
-namespace BadListener.Attribute
+namespace BadListener.Runtime.Attribute
 {
 	public class JsonControllerAttribute : BaseControllerAttribute
 	{
@@ -13,7 +13,7 @@ namespace BadListener.Attribute
 				ContractResolver = new CamelCasePropertyNamesContractResolver()
 			};
 			string json = JsonConvert.SerializeObject(model, settings);
-			context.Response.SetStringResponse(json, "application/json");
+			context.Response.SetStringResponse(json, MimeType.ApplicationJson);
 		}
 	}
 }

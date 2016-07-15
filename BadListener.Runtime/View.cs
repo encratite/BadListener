@@ -1,13 +1,13 @@
-﻿using System;       
+﻿using BadListener.Runtime.Error;
+using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Text;
-using BadListener.Error;
 
-namespace BadListener
+namespace BadListener.Runtime
 {
-	public abstract class View<TModel>
+    public abstract class View<TModel>
 		where TModel : class
 	{
 		private StringBuilder _StringBuilder;

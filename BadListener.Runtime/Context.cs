@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Net;
 
-namespace BadListener
+namespace BadListener.Runtime
 {
     public class Context
 	{

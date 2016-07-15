@@ -1,5 +1,5 @@
-﻿using BadListener.Attribute;
-using BadListener.Error;
+﻿using BadListener.Runtime.Attribute;
+using BadListener.Runtime.Error;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +8,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 
-namespace BadListener
+namespace BadListener.Runtime
 {
     public class HttpServer : IDisposable
 	{
@@ -72,6 +72,13 @@ namespace BadListener
 
 		private void OnRequest(HttpListenerContext context)
 		{
+            var request = context.Request;
+            var response = context.Response;
+            if (request.RawUrl == "/favicon.ico")
+            {
+                response.SetStringResponse("Not found.", MimeType.TextPlain, StatusCode.NotFound);
+                return;
+            }
             Context.OnBeginRequest(context);
             OnBeginRequest?.Invoke();
 			try
@@ -85,7 +92,7 @@ namespace BadListener
 					message = exception.Message;
 				else
 					message = "An internal server error occurred.";
-				context.Response.SetStringResponse(message, MimeType.Plain);
+				response.SetStringResponse(message, MimeType.TextPlain, StatusCode.InternalServerError);
 			}
             Context.OnEndRequest();
             OnEndRequest?.Invoke();

@@ -1,9 +1,9 @@
-﻿using System.Reflection;
-using BadListener.Attribute;
+﻿using BadListener.Runtime.Attribute;
+using System.Reflection;
 
-namespace BadListener
+namespace BadListener.Runtime
 {
-	class ControllerCacheEntry
+    class ControllerCacheEntry
 	{
 		public MethodInfo Method { get; private set; }
 
