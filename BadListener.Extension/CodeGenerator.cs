@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -7,11 +8,14 @@ namespace BadListener.Extension
 	class CodeGenerator
 	{
 		private const string _Prefix = "@";
+        private const string _ScopeStart = "{";
+        private const string _ScopeEnd = "}";
 
 		private List<string> _Lines;
 		private CodeBuilder _Builder;
 		private List<string> _Literals;
 		private int _LineCounter;
+        private int? _CodeBlockIndentationLevel;
 
 		public string GenerateCode(string viewName, string input, string @namespace)
 		{
@@ -29,6 +33,7 @@ namespace BadListener.Extension
 			_Literals = new List<string>();
 			_LineCounter = 1;
 			_Lines = new List<string>();
+            _CodeBlockIndentationLevel = null;
 		}
 
 		private void GenerateNamespace(string viewName, string @namespace)
@@ -69,11 +74,11 @@ namespace BadListener.Extension
 		{
 			var defaultNamespaces = new string[]
 			{
-				"BadListener",
 				"System",
 				"System.Collections.Generic",
 				"System.Linq",
 				"System.Text",
+                "BadListener.Runtime",
 			};
 			foreach (string @namespace in defaultNamespaces)
 				AddNamespace(@namespace);
@@ -124,14 +129,18 @@ namespace BadListener.Extension
 		{
 			var sectionPattern = new MatchState("^" + _Prefix + "section (.+)$");
 			var helperPattern = new MatchState("^" + _Prefix + "helper (.+)$");
-			var blockPattern = new MatchState("^" + _Prefix + "((?:if|for|foreach|while)\\s*\\(.+\\))$");
+			var statementPattern = new MatchState("^" + _Prefix + "((?:if|for|foreach|while)\\s*\\(.+\\))$");
 			var callPattern = new MatchState("^" + _Prefix + "(.*)$");
-			if (line == "{")
+            if (_CodeBlockIndentationLevel.HasValue)
+            {
+                ProcessCodeBlockLine(line);
+            }
+			else if (line == _ScopeStart)
 			{
 				MergeAndEmitLiterals();
 				_Builder.IncreaseIndentation();
 			}
-			else if (line == "}")
+			else if (line == _ScopeEnd)
 			{
 				MergeAndEmitLiterals();
 				_Builder.DecreaseIndentation();
@@ -151,12 +160,19 @@ namespace BadListener.Extension
 				_Builder.EnterHelper();
 				_Builder.AppendLine($"public void {signature}");
 			}
-			else if (blockPattern.Matches(line))
+			else if (statementPattern.Matches(line))
 			{
 				MergeAndEmitLiterals();
-				string block = blockPattern.GetGroup(1);
+				string block = statementPattern.GetGroup(1);
 				_Builder.AppendLine(block);
 			}
+            else if (line == _Prefix + _ScopeStart)
+            {
+                MergeAndEmitLiterals();
+                if (_CodeBlockIndentationLevel.HasValue)
+                    throw new CompilerException("Nesting code blocks is not permitted.");
+                _CodeBlockIndentationLevel = 1;
+            }
 			else if (callPattern.Matches(line))
 			{
 				MergeAndEmitLiterals();
@@ -249,5 +265,24 @@ namespace BadListener.Extension
 		{
 			_Builder.AppendLine($"Write({expression});");
 		}
+
+        private void ProcessCodeBlockLine(string line)
+        {
+            if (line == _ScopeStart)
+            {
+                _CodeBlockIndentationLevel++;
+                _Builder.AppendLine(line);
+            }
+            else if (line == _ScopeEnd)
+            {
+                _CodeBlockIndentationLevel--;
+                if (_CodeBlockIndentationLevel < 1)
+                {
+                    _CodeBlockIndentationLevel = null;
+                    return;
+                }
+            }
+            _Builder.AppendLine(line);
+        }
 	}
 }
