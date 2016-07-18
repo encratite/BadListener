@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace BadListener.Runtime
 {
-    class ControllerCacheEntry
+	class ControllerCacheEntry
 	{
 		public MethodInfo Method { get; private set; }
 

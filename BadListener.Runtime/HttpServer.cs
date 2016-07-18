@@ -10,12 +10,12 @@ using System.Threading;
 
 namespace BadListener.Runtime
 {
-    public class HttpServer : IDisposable
+	public class HttpServer : IDisposable
 	{
-        public event Action OnBeginRequest;
-        public event Action OnEndRequest;
+		public event Action OnBeginRequest;
+		public event Action OnEndRequest;
 
-        private HttpListener _Listener;
+		private HttpListener _Listener;
 		private List<Thread> _RequestThreads = new List<Thread>();
 
 		private Dictionary<string, ControllerCacheEntry> _ControllerCache = new Dictionary<string, ControllerCacheEntry>();
@@ -41,46 +41,46 @@ namespace BadListener.Runtime
 			while (true)
 			{
 				var context = _Listener.GetContext();
-                lock (this)
-                {
-				    var requestThread = new Thread(() => OnRequest(context));
-				    requestThread.Start();
-                    _RequestThreads = _RequestThreads.Where(t => t.ThreadState == ThreadState.Running).ToList();
-				    _RequestThreads.Add(requestThread);
-                }
+				lock (this)
+				{
+					var requestThread = new Thread(() => OnRequest(context));
+					requestThread.Start();
+					_RequestThreads = _RequestThreads.Where(t => t.ThreadState == ThreadState.Running).ToList();
+					_RequestThreads.Add(requestThread);
+				}
 			}
 		}
 
 		public void Stop()
 		{
-            lock (this)
-            {
-			    _Listener.Stop();
-			    foreach (var thread in _RequestThreads)
-                {
-                    try
-                    {
-				        thread.Abort();
-                    }
-                    catch
-                    {
-                    }
-                }
-			    _RequestThreads.Clear();
-            }
+			lock (this)
+			{
+				_Listener.Stop();
+				foreach (var thread in _RequestThreads)
+				{
+					try
+					{
+						thread.Abort();
+					}
+					catch
+					{
+					}
+				}
+				_RequestThreads.Clear();
+			}
 		}
 
 		private void OnRequest(HttpListenerContext context)
 		{
-            var request = context.Request;
-            var response = context.Response;
-            if (request.RawUrl == "/favicon.ico")
-            {
-                response.SetStringResponse("Not found.", MimeType.TextPlain, StatusCode.NotFound);
-                return;
-            }
-            Context.OnBeginRequest(context);
-            OnBeginRequest?.Invoke();
+			var request = context.Request;
+			var response = context.Response;
+			if (request.RawUrl == "/favicon.ico")
+			{
+				response.SetStringResponse("Not found.", MimeType.TextPlain, StatusCode.NotFound);
+				return;
+			}
+			Context.OnBeginRequest(context);
+			OnBeginRequest?.Invoke();
 			try
 			{
 				ProcessRequest(context);
@@ -94,9 +94,9 @@ namespace BadListener.Runtime
 					message = "An internal server error occurred.";
 				response.SetStringResponse(message, MimeType.TextPlain, StatusCode.InternalServerError);
 			}
-            Context.OnEndRequest();
-            OnEndRequest?.Invoke();
-            Context.Dispose();
+			Context.OnEndRequest();
+			OnEndRequest?.Invoke();
+			Context.Dispose();
 		}
 
 		private void ProcessRequest(HttpListenerContext context)
@@ -157,14 +157,9 @@ namespace BadListener.Runtime
 			else
 			{
 				if (type.IsClass || isNullable)
-				{
 					convertedParameter = null;
-				}
 				else
-				{
-					string message = string.Format("Parameter \"{0}\" has not been specified.", parameter.Name);
-					throw new ServerError(message);
-				}
+					throw new ServerError($"Parameter \"{parameter.Name}\" has not been specified.");
 			}
 			invokeParameters.Add(convertedParameter);
 		}

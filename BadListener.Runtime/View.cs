@@ -7,47 +7,47 @@ using System.Text;
 
 namespace BadListener.Runtime
 {
-    public abstract class View<TModel>
+	public abstract class View<TModel>
 		where TModel : class
 	{
 		private StringBuilder _StringBuilder;
 
-        private string _Body;
+		private string _Body;
 
 		private List<Section> _Sections;
 
 		protected TModel Model { get; set; }
 
-        protected dynamic ViewBag { get; set; }
+		protected dynamic ViewBag { get; set; }
 
 		protected string Layout { get; set; }
 
 		public string Render(TModel model)
 		{
-            _StringBuilder = new StringBuilder();
-            _Sections = new List<Section>();
-            Model = model;
-            ViewBag = new ExpandoObject();
+			_StringBuilder = new StringBuilder();
+			_Sections = new List<Section>();
+			Model = model;
+			ViewBag = new ExpandoObject();
 			Execute();
 			string body = _StringBuilder.ToString();
 			var layout = GetLayoutView();
-            string output = body;
+			string output = body;
 			if (layout != null)
-            {
-                _StringBuilder = new StringBuilder();
-			    string content = layout.RenderLayout(_StringBuilder, body, _Sections, ViewBag);
-                output = content;
-            }
-            Cleanup();
-            return output;
+			{
+				_StringBuilder = new StringBuilder();
+				string content = layout.RenderLayout(_StringBuilder, body, _Sections, ViewBag);
+				output = content;
+			}
+			Cleanup();
+			return output;
 		}
 
 		protected abstract void Execute();
 
 		protected void Write(object literal)
 		{
-            if (literal != null)
-			    _StringBuilder.Append(literal.ToString());
+			if (literal != null)
+				_StringBuilder.Append(literal.ToString());
 		}
 
 		protected void RenderBody()
@@ -75,7 +75,7 @@ namespace BadListener.Runtime
 
 		private View<object> GetLayoutView()
 		{
-            var viewType = GetType();
+			var viewType = GetType();
 			string typeName = Layout ?? $"{viewType.Namespace}.Layout";
 			var type = viewType.Assembly.GetType(typeName);
 			if (type == null)
@@ -86,22 +86,22 @@ namespace BadListener.Runtime
 
 		private string RenderLayout(StringBuilder stringBuilder, string body, List<Section> sections, dynamic viewBag)
 		{
-            _StringBuilder = stringBuilder;
+			_StringBuilder = stringBuilder;
 			_Body = body;
 			_Sections = sections;
 			ViewBag = viewBag;
 			Execute();
 			string content = _StringBuilder.ToString();
-            Cleanup();
+			Cleanup();
 			return content;
 		}
 
-        private void Cleanup()
-        {
-            _StringBuilder = null;
-            _Sections = null;
-            Model = null;
-            ViewBag = null;
-        }
+		private void Cleanup()
+		{
+			_StringBuilder = null;
+			_Sections = null;
+			Model = null;
+			ViewBag = null;
+		}
 	}
 }
