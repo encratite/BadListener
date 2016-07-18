@@ -31,7 +31,7 @@ namespace BadListener.Extension
 		public void DecreaseIndentation()
 		{
 			if (_IndentationLevel <= 0)
-				throw new ApplicationException("Negative indentation level.");
+				throw new CompilerException("Negative indentation level.");
 			_IndentationLevel--;
 			if (_SectionIndentationLevel == _IndentationLevel)
 			{
@@ -66,9 +66,9 @@ namespace BadListener.Extension
 		{
 			IndentationSanityCheck();
 			if (!_HelperOffset.HasValue)
-				throw new ArgumentException("Helper offset has not been set.");
+				throw new CompilerException("Helper offset has not been set.");
 			if (_HelperStringBuilder != null)
-				throw new ArgumentException("Nesting helpers is not permitted.");
+				throw new CompilerException("Nesting helpers is not permitted.");
 			_HelperStringBuilder = new StringBuilder();
 			_IndentationLevel--;
 			_HelperIndentationLevel = _IndentationLevel;
@@ -94,7 +94,7 @@ namespace BadListener.Extension
 		private void IndentationSanityCheck()
 		{
 			if (_HelperIndentationLevel.HasValue || _SectionIndentationLevel.HasValue)
-				throw new ArgumentException("Nesting functions is not permitted.");
+				throw new CompilerException("Nesting functions is not permitted.");
 		}
 	}
 }

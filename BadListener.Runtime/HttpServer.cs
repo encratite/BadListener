@@ -1,12 +1,11 @@
-﻿using BadListener.Runtime.Attribute;
-using BadListener.Runtime.Error;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
+using BadListener.Runtime.Attribute;
 
 namespace BadListener.Runtime
 {
@@ -88,7 +87,8 @@ namespace BadListener.Runtime
 			catch (Exception exception)
 			{
 				string message;
-				if (exception is ServerError)
+				var serverException = exception as ServerException;
+				if (serverException != null && serverException.SendToBrowser)
 					message = exception.Message;
 				else
 					message = "An internal server error occurred.";
@@ -105,13 +105,13 @@ namespace BadListener.Runtime
 			var pattern = new Regex("^/([A-Za-z0-9]*)");
 			var match = pattern.Match(request.RawUrl);
 			if (match == null)
-				throw new ServerError("Invalid path.");
+				throw new ServerException("Invalid path.", true);
 			string name = match.Groups[1].Value;
 			if (name == string.Empty)
 				name = "Index";
 			ControllerCacheEntry entry;
 			if (!_ControllerCache.TryGetValue(name, out entry))
-				throw new ServerError("No such controller.");
+				throw new ServerException("No such controller.", true);
 			Type modelType;
 			var model = Invoke(entry.Method, request, out modelType);
 			entry.Attribute.Render(name, model, context, this);
@@ -159,7 +159,7 @@ namespace BadListener.Runtime
 				if (type.IsClass || isNullable)
 					convertedParameter = null;
 				else
-					throw new ServerError($"Parameter \"{parameter.Name}\" has not been specified.");
+					throw new ServerException($"Parameter \"{parameter.Name}\" has not been specified.", true);
 			}
 			invokeParameters.Add(convertedParameter);
 		}

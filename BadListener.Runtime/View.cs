@@ -1,5 +1,4 @@
-﻿using BadListener.Runtime.Error;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
@@ -53,14 +52,14 @@ namespace BadListener.Runtime
 		protected void RenderBody()
 		{
 			if (_Body == null)
-				throw new ViewError("No body has been defined.");
+				throw new ServerException("No body has been defined.");
 			Write(_Body);
 		}
 
 		protected void DefineSection(string name, Action render)
 		{
 			if (_Sections.Any(s => s.Name == name))
-				throw new ViewError($"Section \"{name}\" had already been defined.");
+				throw new ServerException($"Section \"{name}\" had already been defined.");
 			var section = new Section(name, render);
 			_Sections.Add(section);
 		}
@@ -69,7 +68,7 @@ namespace BadListener.Runtime
 		{
 			var section = _Sections.FirstOrDefault(s => s.Name == name);
 			if (section == null)
-				throw new ViewError($"Unable to find section \"{name}\"");
+				throw new ServerException($"Unable to find section \"{name}\"");
 			section.Render();
 		}
 

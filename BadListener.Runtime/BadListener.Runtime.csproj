@@ -60,8 +60,7 @@
     <Compile Include="StatusCode.cs" />
     <Compile Include="View.cs" />
     <Compile Include="Section.cs" />
-    <Compile Include="Error\ServerError.cs" />
-    <Compile Include="Error\ViewError.cs" />
+    <Compile Include="ServerException.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

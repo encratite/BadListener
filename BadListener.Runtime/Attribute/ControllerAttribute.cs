@@ -1,5 +1,4 @@
-﻿using BadListener.Runtime.Error;
-using System;
+﻿using System;
 using System.Linq;
 using System.Net;
 
@@ -18,7 +17,7 @@ namespace BadListener.Runtime.Attribute
 			);
 			var viewType = viewTypes.FirstOrDefault();
 			if (viewType == null)
-				throw new ViewError("Unable to find a corresponding view.");
+				throw new ServerException("Unable to find a corresponding view.");
 			var method = viewType.GetMethod("Render");
 			var instance = Activator.CreateInstance(viewType);
 			var arguments = new object[] { model };
