@@ -268,10 +268,10 @@ namespace BadListener.Extension
 
 		private void ProcessCodeBlockLine(string line)
 		{
+            int indentationLevel = _CodeBlockIndentationLevel.Value;
 			if (line == _ScopeStart)
 			{
 				_CodeBlockIndentationLevel++;
-				_Builder.AppendLine(line);
 			}
 			else if (line == _ScopeEnd)
 			{
@@ -281,8 +281,10 @@ namespace BadListener.Extension
 					_CodeBlockIndentationLevel = null;
 					return;
 				}
+                indentationLevel = _CodeBlockIndentationLevel.Value;
 			}
-			_Builder.AppendLine(line);
+            string indentedLine = CodeBuilder.GetLine(line, indentationLevel - 1);
+			_Builder.AppendLine(indentedLine);
 		}
 	}
 }

@@ -1,9 +1,8 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 
 namespace BadListener.Extension
 {
-	class CodeBuilder
+    class CodeBuilder
 	{
 
 		private StringBuilder _StringBuilder = new StringBuilder();
@@ -14,6 +13,12 @@ namespace BadListener.Extension
 		private int? _HelperIndentationLevel = null;
 
 		private int? _SectionIndentationLevel = null;
+
+        public static string GetLine(string line, int indentationLevel)
+        {
+            string indentation = new string('\t', indentationLevel);
+			return indentation + line;
+        }
 
 		public void AppendLine(string line = "")
 		{
@@ -87,8 +92,7 @@ namespace BadListener.Extension
 
 		private string GetLine(string line)
 		{
-			string indentation = new string('\t', _IndentationLevel);
-			return indentation + line;
+			return GetLine(line, _IndentationLevel);
 		}
 
 		private void IndentationSanityCheck()
