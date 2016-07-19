@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
-namespace BadListener.Runtime.Attribute
+namespace BadListener.Runtime
 {
 	public class JsonControllerAttribute : BaseControllerAttribute
 	{

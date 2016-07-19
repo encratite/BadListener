@@ -5,7 +5,7 @@ using System.Net;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
-using BadListener.Runtime.Attribute;
+using BadListener.Runtime;
 
 namespace BadListener.Runtime
 {

@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Net;
 
-namespace BadListener.Runtime.Attribute
+namespace BadListener.Runtime
 {
 	public class ControllerAttribute : BaseControllerAttribute
 	{
