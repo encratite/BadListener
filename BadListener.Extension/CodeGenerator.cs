@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace BadListener.Extension
 {
-	class CodeGenerator
+    public class CodeGenerator
 	{
 		private const string _Prefix = "@";
 		private const string _ScopeStart = "{";
