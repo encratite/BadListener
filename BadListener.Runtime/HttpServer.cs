@@ -6,6 +6,9 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using BadListener.Runtime;
+using System.IO;
+using System.Collections.Specialized;
+using System.Web;
 
 namespace BadListener.Runtime
 {
@@ -135,19 +138,28 @@ namespace BadListener.Runtime
 		{
 			var parameters = method.GetParameters();
 			var invokeParameters = new List<object>();
+            var nameValueCollection = request.QueryString;
+            if (request.ContentType == MimeType.ApplicationFormUrlEncoded)
+            {
+                using (var reader = new StreamReader(request.InputStream, request.ContentEncoding))
+                {
+                    string input = reader.ReadToEnd();
+                    nameValueCollection = HttpUtility.ParseQueryString(input);
+                }
+            }
 			foreach (var parameter in parameters)
-				SetParameter(request, invokeParameters, parameter);
+				SetParameter(request, invokeParameters, parameter, nameValueCollection);
 			var output = method.Invoke(RequestHandler, invokeParameters.ToArray());
 			modelType = method.ReturnType;
 			return output;
 		}
 
-		private void SetParameter(HttpListenerRequest request, List<object> invokeParameters, ParameterInfo parameter)
+		private void SetParameter(HttpListenerRequest request, List<object> invokeParameters, ParameterInfo parameter, NameValueCollection nameValueCollection)
 		{
 			object convertedParameter;
 			var type = parameter.ParameterType;
 			bool isNullable = type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
-			string argument = request.QueryString[parameter.Name];
+			string argument = nameValueCollection[parameter.Name];
 			if (argument != null)
 			{
 				if (isNullable)
