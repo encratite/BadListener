@@ -24,11 +24,17 @@ namespace BadListener.Runtime
             string httpMethod = GetHttpMethod(Method);
             if (httpMethod != request.HttpMethod)
                 throw new ServerException("Unexpected HTTP method.", true);
+            bool isPost = Method == ControllerMethod.Post;
             if (
-                Method == ControllerMethod.Post &&
+                isPost &&
                 request.Url.Host != request.UrlReferrer.Host
             )
                 throw new ServerException("Invalid referrer.", true);
+            bool isFormUrlEncoded = request.ContentType == MimeType.ApplicationFormUrlEncoded;
+            if (isPost && !isFormUrlEncoded)
+                throw new ServerException("POST requires form content.", true);
+            else if (!isPost && isFormUrlEncoded)
+                throw new ServerException("Form content may only be used with POST.", true);
         }
 
 		public abstract void Render(string name, object model, HttpListenerContext context, HttpServer server);

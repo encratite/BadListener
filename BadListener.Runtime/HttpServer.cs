@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
-using BadListener.Runtime;
-using System.IO;
-using System.Collections.Specialized;
 using System.Web;
 
 namespace BadListener.Runtime
 {
-	public class HttpServer : IDisposable
+    public class HttpServer : IDisposable
 	{
 		public event Action OnBeginRequest;
 		public event Action OnEndRequest;
@@ -115,10 +114,10 @@ namespace BadListener.Runtime
 			ControllerCacheEntry entry;
 			if (!_ControllerCache.TryGetValue(name, out entry))
 				throw new ServerException("No such controller.", true);
-			Type modelType;
-			var model = Invoke(entry.Method, request, out modelType);
             var attribute = entry.Attribute;
             attribute.PerformSanityChecks(context);
+			Type modelType;
+			var model = Invoke(entry.Method, request, out modelType);
             attribute.Render(name, model, context, this);
 		}
 
