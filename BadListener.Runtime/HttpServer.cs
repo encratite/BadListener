@@ -117,7 +117,9 @@ namespace BadListener.Runtime
 				throw new ServerException("No such controller.", true);
 			Type modelType;
 			var model = Invoke(entry.Method, request, out modelType);
-			entry.Attribute.Render(name, model, context, this);
+            var attribute = entry.Attribute;
+            attribute.PerformSanityChecks(context);
+            attribute.Render(name, model, context, this);
 		}
 
 		private void SetControllerCache()

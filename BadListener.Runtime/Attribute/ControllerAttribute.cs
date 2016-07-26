@@ -6,6 +6,11 @@ namespace BadListener.Runtime
 {
 	public class ControllerAttribute : BaseControllerAttribute
 	{
+        public ControllerAttribute(ControllerMethod method = ControllerMethod.Get)
+            : base(method)
+        {
+        }
+
 		public override void Render(string name, object model, HttpListenerContext context, HttpServer server)
 		{
 			var handlerType = server.RequestHandler.GetType();

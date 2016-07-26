@@ -6,6 +6,11 @@ namespace BadListener.Runtime
 {
 	public class JsonControllerAttribute : BaseControllerAttribute
 	{
+        public JsonControllerAttribute(ControllerMethod method = ControllerMethod.Get)
+            : base(method)
+        {
+        }
+
 		public override void Render(string name, object model, HttpListenerContext context, HttpServer server)
 		{
 			var settings = new JsonSerializerSettings
